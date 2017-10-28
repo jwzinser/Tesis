@@ -10,6 +10,7 @@ hierarchies_path = "/home/juanzinser/Workspace/Tesis/data/census/hierarchies/"
 hier_files = [f for f in listdir(hierarchies_path) if isfile(join(hierarchies_path, f))]
 
 hierarchies_dict = dict()
+hierarchies_data_frames = dict()
 hier_columns = list()
 
 for attr in census_name:
@@ -19,6 +20,7 @@ for attr in census_name:
         # check which column has all entries as *
         hier_data = hier_data.dropna(axis=1, how="all")
         hier_data.index = hier_data.ix[:, 0]
+        print(hier_data.to_latex(index=False))
         hierarchies_dict[attr] = hier_data.to_dict()
 
 

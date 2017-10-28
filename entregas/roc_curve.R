@@ -6,10 +6,11 @@ library(knitr)
 setwd("~/Workspace/Tesis/entregas")
 
 
-data_path <- paste("~/Workspace/Tesis/data/census/census_level_0.csv", sep="")
+data_path <- paste("~/Workspace/Tesis/data/census/negative_census_2tt.csv", sep="")
 data <- read.csv(data_path)
 
 data <- data[sample(nrow(data)),]
+data[is.na(data)] <- 0
 
 columns <- c()
 for(col in seq(1:dim(data)[2])){
@@ -28,7 +29,6 @@ trainX <- X[1:ll,]
 trainy <- y[1:ll]
 testX <- X[(ll+1):ul,]
 testy <- y[(ll+1):ul]
-
 # hacer
 model <- C5.0(trainX, trainy, trials=10, control = C5.0Control(minCases = 10 )) # min cases de 8 a 15
 
@@ -58,8 +58,5 @@ roc_table <- data.frame(cutoff=performance_obj@alpha.values[[1]],
 kable(roc_table, format.args=list(big.mark=","))
 
 
-dev.copy(png, 
-         paste('/home/juanzinser/Workspace/Tesis/entregas/plots/census_level_',i,'.png',sep=""))
-dev.off()
+dev.copy(rp, '/home/juanzinser/Workspace/Tesis/entregas/plots/negative_census_uniform.png')
 cat(model$output)
-cat("\n\n\n\n\n\n\n\n\n")
