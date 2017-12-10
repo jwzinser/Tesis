@@ -119,19 +119,19 @@ save.image()
 save_auc_df <- "../data/rdata/auc_df.RData"
 save(auc_df, file = save_auc_df)
 save.image()
-auc_sep <- auc_df %>% rowwise() %>% mutate(privacy = substr(case,1,1)) %>% mutate(include_real = substr(case,2,2)=="t") %>% mutate(uniform = substr(case, 3,3)=="t") %>% mutate(prob_of_real = substr(case, 4, 10)) %>% select(-case)
-auc_tt <- auc_sep %>% filter(include_real) %>% filter(uniform) %>% select(auc, privacy) %>% rename(real=auc)
-auc_ft <- auc_sep %>% filter(!include_real) %>% filter(uniform) %>% select(auc, privacy) %>% rename(nonreal=auc)
+auc_sep <- auc_df %>% rowwise() %>% mutate(privacy = substr(case,1,1)) %>% mutate(include_real = substr(case,2,2)=="t") %>% mutate(uniform = substr(case, 3,3)=="t") %>% mutate(prob_of_real = substr(case, 4, 10)) %>% dplyr::select(-case)
+auc_tt <- auc_sep %>% filter(include_real) %>% filter(uniform) %>% dplyr::select(auc, privacy) %>% rename(real=auc)
+auc_ft <- auc_sep %>% filter(!include_real) %>% filter(uniform) %>% dplyr::select(auc, privacy) %>% rename(nonreal=auc)
 auc_uniforms <- auc_ft %>% inner_join(auc_tt)
-xtable(auc_uniforms %>% select(privacy, nonreal, real))
+xtable(auc_uniforms %>% dplyr::select(privacy, nonreal, real))
 
 auc_ordered <- auc_sep %>% arrange(desc(auc))
 uniform_auc <- auc_ordered %>% filter(uniform)
 
-auc_tf <- auc_sep %>% filter(include_real) %>% filter(!uniform) %>% filter(prob_of_real=="None") %>%  select(auc, privacy) %>% rename(real=auc)
-auc_ff <- auc_sep %>% filter(!include_real) %>% filter(!uniform) %>% select(auc, privacy) %>% rename(nonreal=auc)
+auc_tf <- auc_sep %>% filter(include_real) %>% filter(!uniform) %>% filter(prob_of_real=="None") %>%  dplyr::select(auc, privacy) %>% rename(real=auc)
+auc_ff <- auc_sep %>% filter(!include_real) %>% filter(!uniform) %>% dplyr::select(auc, privacy) %>% rename(nonreal=auc)
 auc_nonuniforms <- auc_tf %>% inner_join(auc_ff)
-xtable(auc_nonuniforms %>% select(privacy, nonreal, real))
+xtable(auc_nonuniforms %>% dplyr::select(privacy, nonreal, real))
 
 #load(file=save_path)
 #legend(x=0.6, y=.3,legend=good_cases,
@@ -139,3 +139,16 @@ xtable(auc_nonuniforms %>% select(privacy, nonreal, real))
 
 # el mejor punto de corte, rocr, para encontrae el mejor TPR, y FNR
 # label ordering, para decirle cuales son el positivo y el negativo
+
+
+
+# tile plot of the 
+auc_for_tile <- (auc_sep %>% filter(prob_of_real=="None" | prob_of_real=="") %>% 
+                   mutate(case=paste(ifelse(include_real,"T","F"),ifelse(uniform,"T","F"),"")) %>% 
+                   dplyr::select(privacy,case,auc))
+gg_ch <- (ggplot(auc_for_tile, aes(y = factor(case),  x = factor(privacy))) +  
+            geom_tile(aes(fill = auc)) + ggtitle("AUC by case and privacy")
+          #+ scale_fill_continuous(low = "green", high = "red")
+)
+gg_ch
+ggsave("plots/tile_auc_case.png")
