@@ -25,13 +25,14 @@ def weights_to_probabilities(weights_vector, sum_to=1.):
         return weights_vector
 
 
-def operator_model(original_list, privacy=3, include_real=True, uniform=True, real_prob=.2):
+def operator_model(original_list, privacy=3, include_real=True, uniform=True, real_prob=.2, maybe=False):
     """
     :param original_list:
     :param privacy:
     :param include_real:
     :param uniform:
     :param real_prob: if uniform is false and include_real true, the real value will be given this probability
+    :param maybe: if the maybe is true, include real is ignored
     :return:
     """
     # gets the real frequencies and calculates the changes for the new_value for each possible case
@@ -67,12 +68,13 @@ def operator_model(original_list, privacy=3, include_real=True, uniform=True, re
         real_prob = ordered_weights[key_to_order[entry]] if real_prob is None else real_prob
         real_value = (privacy_fraction if uniform else real_prob) if include_real else 0
         entry_vector = weights_to_probabilities(entry_vector, 1 - real_value)
-        entry_vector[key_to_order[entry]] = real_value
+        if not maybe:
+            entry_vector[key_to_order[entry]] = real_value
         entry_vector = weights_to_probabilities(entry_vector)
         return entry_vector
 
     # negative_list.append(entry_vector)
-    negative_list = [entry_sanitization(i, real_prob)  for i in  original_list]
+    negative_list = [entry_sanitization(i, real_prob) for i in original_list]
 
     result_dict = dict()
     for idx, field in enumerate(sorted(counts.keys())):
@@ -85,22 +87,29 @@ def operator_model(original_list, privacy=3, include_real=True, uniform=True, re
 
 
 column_size=1000
+nsim_case = 10
 cases = list()
-for nclasses in range(200, 300)[::1]:
+for nclasses in range(1, 30)[::1]:
     #for true_prob in [None, .2, .4, .6, .8]:
     for true_prob in [None]:
-        for pr in range(1,nclasses):
+        for pr in range(1, nclasses):
             for class_dist in ['uniform','exponential']:
-                cases += [[pr, nclasses, class_dist, True, False, true_prob],
-                          [pr, nclasses, class_dist, False, False, true_prob],
-                          [pr, nclasses, class_dist, False, True, true_prob],
-                          [pr, nclasses, class_dist, True, True, true_prob]]
+                for nsim in range(nsim_case):
+                    cases += [[pr, nclasses, class_dist, True, False, true_prob, False],
+                              [pr, nclasses, class_dist, False, False, true_prob, False],
+                              [pr, nclasses, class_dist, False, True, true_prob, False],
+                              [pr, nclasses, class_dist, True, True, true_prob, False],
+                              [pr, nclasses, class_dist, False, False, true_prob, True],
+                              [pr, nclasses, class_dist, False, True, true_prob, True]]
+
+
+
 
 processed_cases = list()
 reco_df = pn.DataFrame(columns=["case", "class", "CIS", "NIS"])
 rmse_by_case = dict()
 def process_case(case):
-    case_name = str(case[0])+("t" if case[3] else "f")+ ("t" if case[4] else "f")+(str(case[5]) if (case[3] and not case[4]) else "")
+    case_name = str(case[0])+("m" if case[6] else "t" if case[3] else "f")+ ("t" if case[4] else "f")+(str(case[5]) if (case[3] and not case[4]) else "")
     case_name += '_' + str(case[1]) + '_' + str(case[2])
     nclasses = case[1]
     class_dist = case[2]
@@ -119,7 +128,7 @@ def process_case(case):
     tmp_df = cis.merge(nis, how="left")
     tmp_df['RMSE'] = (tmp_df['CIS'] - tmp_df['NIS']).map(lambda x: x*x)
     rmse_one = math.sqrt(sum(tmp_df['RMSE'].values))
-    niter = r.incr("case3")
+    niter = r.incr("case6")
     if niter % 100 == 0:
         print(float(niter)/len(cases)*100)
     # rmse_by_case[case_name] = math.sqrt(sum(tmp_df['RMSE'].values))
@@ -139,11 +148,11 @@ rmse_df = pn.DataFrame(cases_results)
 rmse_df.columns = ["case", "rmse"]
 import re
 rmse_df["privacy"] = rmse_df["case"].map(lambda x: re.findall("\d+", x)[0])
-rmse_df["real"] = rmse_df["case"].map(lambda x: int(re.findall("[^\d]",x)[0] == "t"))
+rmse_df["real"] = rmse_df["case"].map(lambda x: re.findall("[^\d]",x)[0])
 rmse_df["uniform"] = rmse_df["case"].map(lambda x: int(re.findall("[^\d]",x)[1] == "t"))
 rmse_df["nclasses"] = rmse_df["case"].map(lambda x: re.findall("\d+", x)[1])
 rmse_df["uniform_original"] = rmse_df["case"].map(lambda x: int(x.split("_")[-1] == "uniform"))
 
 
 
-rmse_df.to_csv("data/rmse_df_1219_map.csv")
+rmse_df.to_csv("data/rmse_df_1230_zoom_map_maybe.csv")
