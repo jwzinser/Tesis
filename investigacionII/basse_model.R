@@ -12,16 +12,18 @@ library(plotROC)
 library(dplyr)
 library(xtable)
 
-setwd("~/Workspace/Tesis/entregas")
+setwd("~/Workspace/Tesis/investigacionII")
 
 png("/home/juanzinser/Workspace/Tesis/entregas/plots/census_negativte_all.png")
 cases = c()
 for(pr in seq(1:10)){
-  for(true_prob in c("0.2","0.4","0.6","0.8", "None")){
+  for(true_prob in c("None")){
         cases = c(cases, c(paste(pr, "t", "f", true_prob,sep=""),
                             paste(pr, "f", "f", sep=""),
                             paste(pr, "f", "t", sep=""),
-                            paste(pr, "t", "t",sep="")))
+                            paste(pr, "t", "t",sep=""),                            
+                           paste(pr, "m", "t", sep=""),
+                           paste(pr, "m", "f",sep="")))
   }
 }
 
@@ -32,7 +34,7 @@ good_colors <- c()
 for(i in cases){
   if(!(i %in% good_cases)){
   # read the table
-  data_path <- paste("~/Workspace/Tesis/data/census/negative_census_",i,".csv", sep="")
+  data_path <- paste("~/Workspace/Tesis/data/census/maybe/negative_census_",i,".csv", sep="")
   if(file.exists(data_path)){
   data <- read.csv(data_path)
   print(i)
@@ -96,7 +98,10 @@ for(i in cases){
     }
   }
 }
+
 roc_df_up <- roc_df %>% rowwise() %>% mutate(privacy = substr(case,1,1)) %>% mutate(include_real = substr(case,2,2)=="t") %>% mutate(uniform = substr(case, 3,3)=="t") %>% mutate(prob_of_real = substr(case, 4, 10))
+
+write.csv(roc_df, file = "~/Workspace/Tesis/data/census/maybe/roc/df.csv")
 
 # para las que son 
 for(p in c(1:9)){
@@ -115,6 +120,9 @@ dev.off()
 save_roc_df <- "../data/rdata/roc_df.RData"
 save(roc_df, file = save_roc_df)
 save.image()
+
+save_roc_df <- "../data/rdata/roc_df.RData"
+load( file = save_roc_df)
 
 save_auc_df <- "../data/rdata/auc_df.RData"
 save(auc_df, file = save_auc_df)
