@@ -27,6 +27,7 @@ for(pr in seq(1:10)){
   }
 }
 
+#cases <- c(0,1,2,3)
 colors <- heat.colors(length(cases), alpha = 1)
 iter <- 1
 good_cases <- c()
@@ -35,6 +36,8 @@ for(i in cases){
   if(!(i %in% good_cases)){
   # read the table
   data_path <- paste("~/Workspace/Tesis/data/census/maybe/negative_census_",i,".csv", sep="")
+  #data_path <- paste("~/Workspace/Tesis/data/census/census_level_",i,".csv", sep="")
+
   if(file.exists(data_path)){
   data <- read.csv(data_path)
   print(i)
@@ -101,7 +104,10 @@ for(i in cases){
 
 roc_df_up <- roc_df %>% rowwise() %>% mutate(privacy = substr(case,1,1)) %>% mutate(include_real = substr(case,2,2)=="t") %>% mutate(uniform = substr(case, 3,3)=="t") %>% mutate(prob_of_real = substr(case, 4, 10))
 
+#write.csv(roc_df, file = "~/Workspace/Tesis/data/census/maybe/roc/df_hier.csv")
 write.csv(roc_df, file = "~/Workspace/Tesis/data/census/maybe/roc/df.csv")
+write.csv(auc_df, file = "~/Workspace/Tesis/data/census/maybe/roc/df_auc.csv")
+
 
 # para las que son 
 for(p in c(1:9)){
