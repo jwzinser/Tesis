@@ -123,18 +123,20 @@ def get_auc_score_of_model(df, model):
     roc_curve = metrics.roc_curve(ytest, predicted_score)
     return prediction_error, roc_auc, roc_curve
 
+
 def get_single_filter_df(df, k, v):
     """
     Applies a filter to a pandas DataFrame, which might me a multiple condition
     """
-    v = [v] if not isinstance(v, list) else v
-    if k in df.columns:
-        if np.issubdtype(df[k].dtype , np.number):
-            cond = " | ".join(["{k} == {val}".format(k=k, val=v0) for v0 in v])
-            df = df.query(cond)
-        else:
-            cond = " | ".join(["{k} == '{val}'".format(k=k, val=v0) for v0 in v])
-            df = df.query(cond)
+    if v:
+        v = [v] if not isinstance(v, list) else v
+        if k in df.columns:
+            if np.issubdtype(df[k].dtype , np.number):
+                cond = " | ".join(["{k} == {val}".format(k=k, val=v0) for v0 in v])
+                df = df.query(cond)
+            else:
+                cond = " | ".join(["{k} == '{val}'".format(k=k, val=v0) for v0 in v])
+                df = df.query(cond)
     return df
 
 
@@ -233,19 +235,23 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
 
     yaxis: is either rmse or auc, both lower cased
     """
+    df_cols_gb = list(set(["privacy", "real", "uniform", "uniform2", "model"]).intersection(set(df.columns)))
+    #df = df.groupby(df_cols_gb)[yaxis].agg(lambda x: np.mean(x)).reset_index()
+
     fig, ax = plt.subplots()
     labels = []
     for real in reals:
         for uniform in uniforms:
-            for unirform2 in uniforms2:
+            for uniform2 in uniforms2:
                 for model in models:
                     dfc = get_single_filter_df(df, "real", real)
                     dfc = get_single_filter_df(dfc, "uniform", uniform)
                     dfc = get_single_filter_df(dfc, "uniform2", uniform2)
                     dfc = get_single_filter_df(dfc, "model", model)
 
-                    dfc[gb_param] = dfc[gb_param].map(int)
+                    dfc.loc[:,gb_param] = dfc[gb_param].map(int)
                     gb = dfc.sort_values(by="privacy", ascending=True)
+                    gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
                     x = gb[gb_param]
                     y = gb[yaxis]
                     ax.plot(x, y)
@@ -257,7 +263,7 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
     ax.set_xlabel(gb_param)
-    ax.set_ylabel(jaxis)
+    ax.set_ylabel(yaxis)
     if savefig:
         plt.savefig("~/Documents/plots/"+ save_name+".png")
     plt.show()
