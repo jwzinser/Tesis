@@ -242,7 +242,7 @@ def plot_intervals(df, gb_param, base_filter, savefig=False,  title=None, save_n
     ax.set_xlabel(gb_param)
     ax.set_ylabel("RMSE")
     if savefig:
-        plt.savefig("/Users/juanzinser/Documents/plots" + save_name + ".png")
+        plt.savefig("/home/juanzinser/Documents/plots" + save_name + ".png")
     plt.show()
 
 
@@ -285,12 +285,11 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
     ax.set_xlabel("FPR")
     ax.set_ylabel("TPR")
     if savefig:
-        plt.savefig("/Users/juanzinser/Documents/plots/" + save_name + ".png")
+        plt.savefig("/home/juanzinser/Documents/plots/" + save_name + ".png")
     plt.show()
 
 
-
-def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, models, savefig=False, title=None, save_name=None):
+def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, models, combined_cond=None, savefig=False, title=None, save_name=None):
     """
     Gets the supervised RMSE plot, since non supervised also has RMSE, pending is to check what is the difference between 
     this function and the plot_params, which plots the RMSE for the non supervised case. Both rmse and auc are merged now
@@ -310,26 +309,46 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
         for uniform in uniforms:
             for uniform2 in uniforms2:
                 for model in models:
-                    dfc = get_single_filter_df(df, "real", real)
-                    dfc = get_single_filter_df(dfc, "uniform", uniform)
-                    dfc = get_single_filter_df(dfc, "uniform2", uniform2)
-                    dfc = get_single_filter_df(dfc, "model", model)
+                    if combined_cond is not None and isinstance(combined_cond, dict): 
+                        for tp, vl in combined_cond.items():
+                            dfc = get_single_filter_df(df, "real", real)
+                            dfc = get_single_filter_df(dfc, "uniform", uniform)
+                            dfc = get_single_filter_df(dfc, "uniform2", uniform2)
+                            dfc = get_single_filter_df(dfc, "model", model)
+                            for col, val in zip(tp, vl):
+                                dfc = get_single_filter_df(dfc, "model", model)
+                            dfc.loc[:, gb_param] = dfc[gb_param].map(int)
+                            gb = dfc.sort_values(by="privacy", ascending=True)
+                            gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
+                            x = gb[gb_param]
+                            y = gb[yaxis]
+                            ax.plot(x, y)
+                            lines, _ = ax.get_legend_handles_labels()
+                            tt = "real=" + str(real) + ", uniform=" + str(uniform) + ", uniform2=" + str(uniform2) + ", model=" + str(model)
+                            print(tt)
+                            print(len(gb))
+                            labels.append(tt)
+                    else:
+                            dfc = get_single_filter_df(df, "real", real)
+                            dfc = get_single_filter_df(dfc, "uniform", uniform)
+                            dfc = get_single_filter_df(dfc, "uniform2", uniform2)
+                            dfc = get_single_filter_df(dfc, "model", model)
 
-                    dfc.loc[:, gb_param] = dfc[gb_param].map(int)
-                    gb = dfc.sort_values(by="privacy", ascending=True)
-                    gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
-                    x = gb[gb_param]
-                    y = gb[yaxis]
-                    ax.plot(x, y)
-                    lines, _ = ax.get_legend_handles_labels()
-                    tt = "real=" + str(real) + ", uniform=" + str(uniform) + ", uniform2=" + str(uniform2) + ", model=" + str(model)
+                            dfc.loc[:, gb_param] = dfc[gb_param].map(int)
+                            gb = dfc.sort_values(by="privacy", ascending=True)
+                            gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
+                            x = gb[gb_param]
+                            y = gb[yaxis]
+                            ax.plot(x, y)
+                            lines, _ = ax.get_legend_handles_labels()
+                            tt = "real=" + str(real) + ", uniform=" + str(uniform) + ", uniform2=" + str(uniform2) + ", model=" + str(model)
 
-                    labels.append(tt)
+                            labels.append(tt)
 
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
     ax.set_xlabel(gb_param)
     ax.set_ylabel(yaxis)
     if savefig:
-        plt.savefig("/Users/juanzinser/Documents/plots" + save_name + ".png")
+        plt.savefig("/home/juanzinser/Documents/plots" + save_name + ".png")
     plt.show()
