@@ -189,6 +189,19 @@ def get_auc_score_of_model(df, model):
     return prediction_error, roc_auc, roc_curve
 
 
+def get_label_name(param_dict):
+    """
+    Gets the name of the label from the parameters being used.
+
+    """
+    param_list = [("real", " R={val}"), ("uniform", " U={val}"), ("uniform2"," U2={val}"), ("model"," M={val}")]
+    label_name = ""
+    for param, valpar in param_list:
+        if param_dict.get(param) is not None:
+            label_name += valpar.format(val=str(param_dict.get(param)))
+    return label_name  
+
+
 def get_single_filter_df(df, k, v):
     """
     Applies a filter to a pandas DataFrame, which might me a multiple condition
@@ -286,8 +299,8 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
     ax.set_ylabel("TPR")
     if savefig:
         plt.savefig("/home/juanzinser/Documents/plots/" + save_name + ".png")
-    plt.show()
-
+    plt.show()  
+        
 
 def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, models, combined_cond=None, savefig=False, title=None, save_name=None):
     """
@@ -311,39 +324,48 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                 for model in models:
                     if combined_cond is not None and isinstance(combined_cond, dict): 
                         for tp, vl in combined_cond.items():
-                            dfc = get_single_filter_df(df, "real", real)
-                            dfc = get_single_filter_df(dfc, "uniform", uniform)
-                            dfc = get_single_filter_df(dfc, "uniform2", uniform2)
-                            dfc = get_single_filter_df(dfc, "model", model)
-                            for col, val in zip(tp, vl):
+                            param_dict = {"real":real, "uniform":uniform, "uniform2": uniform2, "model":model}
+                            for col, val in zip([tp]*len(vl), vl):
+                                dfc = df
+                                print(col)
+                                print(val)
+                                for i, j in enumerate(col):
+                                    dfc = get_single_filter_df(dfc, j, val[i])
+                                    param_dict[j] = val[i]
+                                dfc = get_single_filter_df(dfc, "real", real)
+                                dfc = get_single_filter_df(dfc, "uniform", uniform)
+                                dfc = get_single_filter_df(dfc, "uniform2", uniform2)
                                 dfc = get_single_filter_df(dfc, "model", model)
-                            dfc.loc[:, gb_param] = dfc[gb_param].map(int)
-                            gb = dfc.sort_values(by="privacy", ascending=True)
-                            gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
-                            x = gb[gb_param]
-                            y = gb[yaxis]
-                            ax.plot(x, y)
-                            lines, _ = ax.get_legend_handles_labels()
-                            tt = "real=" + str(real) + ", uniform=" + str(uniform) + ", uniform2=" + str(uniform2) + ", model=" + str(model)
-                            print(tt)
-                            print(len(gb))
-                            labels.append(tt)
+                                
+                                dfc.loc[:, gb_param] = dfc[gb_param].map(int)
+                                gb = dfc.sort_values(by="privacy", ascending=True)
+                                gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
+                                x = gb[gb_param]
+                                y = gb[yaxis]
+                                ax.plot(x, y)
+                                lines, _ = ax.get_legend_handles_labels()
+                                tt = get_label_name(param_dict)
+                                print(tt)
+                                print(len(gb))
+                                print(param_dict)
+                                labels.append(tt)
                     else:
-                            dfc = get_single_filter_df(df, "real", real)
-                            dfc = get_single_filter_df(dfc, "uniform", uniform)
-                            dfc = get_single_filter_df(dfc, "uniform2", uniform2)
-                            dfc = get_single_filter_df(dfc, "model", model)
+                        param_dict = {"real":real, "uniform":uniform, "uniform2": uniform2, "model":model}
+                        dfc = get_single_filter_df(df, "real", real)
+                        dfc = get_single_filter_df(dfc, "uniform", uniform)
+                        dfc = get_single_filter_df(dfc, "uniform2", uniform2)
+                        dfc = get_single_filter_df(dfc, "model", model)
 
-                            dfc.loc[:, gb_param] = dfc[gb_param].map(int)
-                            gb = dfc.sort_values(by="privacy", ascending=True)
-                            gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
-                            x = gb[gb_param]
-                            y = gb[yaxis]
-                            ax.plot(x, y)
-                            lines, _ = ax.get_legend_handles_labels()
-                            tt = "real=" + str(real) + ", uniform=" + str(uniform) + ", uniform2=" + str(uniform2) + ", model=" + str(model)
+                        dfc.loc[:, gb_param] = dfc[gb_param].map(int)
+                        gb = dfc.sort_values(by="privacy", ascending=True)
+                        gb = gb.groupby(gb_param)[yaxis].agg(lambda x: np.mean(x)).reset_index()
+                        x = gb[gb_param]
+                        y = gb[yaxis]
+                        ax.plot(x, y)
+                        lines, _ = ax.get_legend_handles_labels()
+                        tt = get_label_name(param_dict)
 
-                            labels.append(tt)
+                        labels.append(tt)
 
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
