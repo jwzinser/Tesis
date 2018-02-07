@@ -242,7 +242,7 @@ def plot_intervals(df, gb_param, base_filter, savefig=False,  title=None, save_n
     ax.set_xlabel(gb_param)
     ax.set_ylabel("RMSE")
     if savefig:
-        plt.savefig("~/Documents/plots/"+ save_name+".png")
+        plt.savefig("/Users/juanzinser/Documents/plots" + save_name + ".png")
     plt.show()
 
 
@@ -285,9 +285,9 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
     ax.set_xlabel("FPR")
     ax.set_ylabel("TPR")
     if savefig:
-        plt.savefig("~/Documents/plots/income_roc_"+ save_name+".png")
+        plt.savefig("/Users/juanzinser/Documents/plots/" + save_name + ".png")
     plt.show()
-    
+
 
 def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, models, savefig=False, title=None, save_name=None):
     """
@@ -330,5 +330,5 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     ax.set_xlabel(gb_param)
     ax.set_ylabel(yaxis)
     if savefig:
-        plt.savefig("~/Documents/plots/"+ save_name+".png")
+        plt.savefig("/Users/juanzinser/Documents/plots" + save_name + ".png")
     plt.show()
