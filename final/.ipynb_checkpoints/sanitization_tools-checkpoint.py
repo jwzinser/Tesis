@@ -327,8 +327,6 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                             param_dict = {"real":real, "uniform":uniform, "uniform2": uniform2, "model":model}
                             for col, val in zip([tp]*len(vl), vl):
                                 dfc = df
-                                print(col)
-                                print(val)
                                 for i, j in enumerate(col):
                                     dfc = get_single_filter_df(dfc, j, val[i])
                                     param_dict[j] = val[i]
@@ -345,9 +343,6 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                                 ax.plot(x, y)
                                 lines, _ = ax.get_legend_handles_labels()
                                 tt = get_label_name(param_dict)
-                                print(tt)
-                                print(len(gb))
-                                print(param_dict)
                                 labels.append(tt)
                     else:
                         param_dict = {"real":real, "uniform":uniform, "uniform2": uniform2, "model":model}
