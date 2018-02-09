@@ -365,6 +365,7 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                                     dfc = get_single_filter_df(dfc, "real", real)
                                     dfc = get_single_filter_df(dfc, "uniform", uniform)
                                     dfc = get_single_filter_df(dfc, "uniform2", uniform2)
+                                    dfc = get_single_filter_df(dfc, "uniform_original", uo)
                                     dfc = get_single_filter_df(dfc, "model", model)
 
                                     dfc.loc[:, gb_param] = dfc[gb_param].map(int)
@@ -383,6 +384,7 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                             dfc = get_single_filter_df(df, "real", real)
                             dfc = get_single_filter_df(dfc, "uniform", uniform)
                             dfc = get_single_filter_df(dfc, "uniform2", uniform2)
+                            dfc = get_single_filter_df(dfc, "uniform_original", uo)
                             dfc = get_single_filter_df(dfc, "model", model)
 
                             dfc.loc[:, gb_param] = dfc[gb_param].map(int)
