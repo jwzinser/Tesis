@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 
-figures_path = "/home/juanzinser/Documents/plots/"
+figures_path = "/Users/juanzinser/Documents/plots/"
 def expo_weights(nclasses):
     weights = list()
     curr_weight = 1.
