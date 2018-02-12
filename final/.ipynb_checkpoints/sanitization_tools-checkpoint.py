@@ -247,6 +247,8 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
     if pt is not None:
         base_filter.pop("privacy")
         df = df.query("privacy < {pt}".format(pt=pt))
+    if "uniform" in gb_param:
+        df = df[df.uniform == df.uniform2]
     df = get_base_filtered_df(df, base_filter)
     ps = list()
     labels = list()
@@ -256,10 +258,11 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
             v = [v] if not isinstance(v, list) else v
             for v0 in v:
                 dfc = get_single_filter_df(df, k, v0)
+
                 gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
                 gb2 = dfc.groupby([gb_param])[yaxis].std().reset_index()
 
-                x = gb[gb_param].unique()
+                x = gb[gb_param].unique() 
                 ind = np.arange(len(x))
                 curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=np.random.rand(3,),
                                 bottom=0, yerr=gb2[yaxis])
@@ -268,7 +271,6 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
                 tt = get_label_name(param_dict, True)
                 labels.append(tt)
                 width += width_delta
-
 
     else:
         gb = df.groupby([gb_param])[yaxis].mean().reset_index()
