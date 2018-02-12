@@ -236,6 +236,70 @@ def get_base_filtered_df(df, base_filter=None):
     return df
 
 
+def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  title=None, save_name=None, width_delta=.2):
+    """
+    Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
+    Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
+
+    """
+    fig, ax = plt.subplots()
+    pt = base_filter.get("privacy")
+    if pt is not None:
+        base_filter.pop("privacy")
+        df = df.query("privacy < {pt}".format(pt=pt))
+    df = get_base_filtered_df(df, base_filter)
+    ps = list()
+    labels = list()
+    width = 0
+    if len(lines_cases)>0:
+        for k, v in lines_cases.items():
+            v = [v] if not isinstance(v, list) else v
+            for v0 in v:
+                dfc = get_single_filter_df(df, k, v0)
+                gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
+                gb2 = dfc.groupby([gb_param])[yaxis].std().reset_index()
+
+                x = gb[gb_param].unique()
+                ind = np.arange(len(x))
+                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=np.random.rand(3,),
+                                bottom=0, yerr=gb2[yaxis])
+                ps.append(curr_p)
+                param_dict = {k: v0}
+                tt = get_label_name(param_dict, True)
+                labels.append(tt)
+                width += width_delta
+
+
+    else:
+        gb = df.groupby([gb_param])[yaxis].mean().reset_index()
+        gb2 = df.groupby([gb_param])[yaxis].std().reset_index()
+
+        x = gb[gb_param].unique()
+        ind = np.arange(len(x))
+        curr_p = ax.bar(ind+width, gb[yaxis], width_delta, color=np.random.rand(3,),
+                        bottom=0, yerr=gb2[yaxis])
+        ps.append(curr_p)
+        tt = get_label_name(base_filter, True)
+        labels.append(tt)
+        width += width_delta
+
+
+
+    ax.set_title(title)
+    ax.set_xticks(ind + width_delta / 2)
+    ax.set_ylabel(yaxis)
+    ax.set_xticklabels(x, rotation = 45, ha="right")
+    ax.legend((p[0] for p in ps), labels)
+
+
+
+    ax.set_xlabel(gb_param.upper())
+    ax.set_ylabel(yaxis.upper())
+    if savefig:
+        plt.savefig(figures_path + save_name + ".png")
+    plt.show()
+
+
 def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  title=None, save_name=None):
     """
     Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
@@ -261,7 +325,7 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
                 y3 = gb.query("level_1 == 0.75")[yaxis]
                 ax.fill_between(x, y1, y3, color='grey', alpha='0.5')
                 ax.plot(x,y2)
-                param_dict = {k:v0}
+                param_dict = {k: v0}
                 tt = get_label_name(param_dict, True)
                 labels.append(tt)
                 lines, _ = ax.get_legend_handles_labels()
@@ -343,8 +407,6 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
 
     yaxis: is either rmse or auc, both lower cased
     """
-    df_cols_gb = list(set(["privacy", "real", "uniform", "uniform2", "model"]).intersection(set(df.columns)))
-    #df = df.groupby(df_cols_gb)[yaxis].agg(lambda x: np.mean(x)).reset_index()
     df = df.query("privacy < 11")
     fig, ax = plt.subplots()
     labels = []
