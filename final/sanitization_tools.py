@@ -262,7 +262,7 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
                 gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
                 gb2 = dfc.groupby([gb_param])[yaxis].std().reset_index()
 
-                x = gb[gb_param].unique() 
+                x = gb[gb_param].unique()
                 ind = np.arange(len(x))
                 curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=np.random.rand(3,),
                                 bottom=0, yerr=gb2[yaxis])
@@ -468,3 +468,19 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
+
+
+
+def isolator_point(SDB, RDB, columns_classes, z):
+    """
+    Performs the isolator definition of privacy given by
+    Cynthia Dwork in the article - Toward privacy in public databases
+
+    for a given point get the number of possible points that satisfy the condition given the
+    sanitization criteria.
+
+    :param SDB: Sanitized Database
+    :param RDB: Real Database
+    :param z: the sanitization parameters
+    :return:
+    """
