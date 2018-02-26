@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 
-figures_path = "/Users/juanzinser/Documents/plots/"
+figures_path = "/home/juanzinser/Documents/plots/"
 def expo_weights(nclasses):
     weights = list()
     curr_weight = 1.
@@ -315,6 +315,8 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
         df = df.query("privacy < {pt}".format(pt=pt))
     df = get_base_filtered_df(df, base_filter)
     labels = []
+    df = df[df.uniform == df.uniform2]
+    y_max = 0
     if len(lines_cases)>0:
         for k, v in lines_cases.items():
             v = [v] if not isinstance(v, list) else v
@@ -331,6 +333,7 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
                 tt = get_label_name(param_dict, True)
                 labels.append(tt)
                 lines, _ = ax.get_legend_handles_labels()
+                y_max = max(y_max, max(y2))
     else:
         gb = df.groupby([gb_param])[yaxis].quantile([.1,.25,.5,.75,0.9]).reset_index()
         x = gb[gb_param].unique()
@@ -342,9 +345,67 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
         tt = get_label_name(base_filter, True)
         labels.append(tt)
         lines, _ = ax.get_legend_handles_labels()
+        y_max = max(y_max, max(y2))
 
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
+    #ax.set_ylim([0, y_max*1.5])
+    ax.set_xlabel(gb_param.upper())
+    ax.set_ylabel(yaxis.upper())
+    if savefig:
+        plt.savefig(figures_path + save_name + ".png")
+    plt.show()
+
+def plot_intervals_std(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  title=None, save_name=None):
+    """
+    Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
+    Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
+
+    """
+    fig, ax = plt.subplots()
+    pt = base_filter.get("privacy")
+    if pt is not None:
+        base_filter.pop("privacy")
+        df = df.query("privacy < {pt}".format(pt=pt))
+    df = get_base_filtered_df(df, base_filter)
+    labels = []
+    df = df[df.uniform == df.uniform2]
+    y_max = 0
+    if len(lines_cases)>0:
+        for k, v in lines_cases.items():
+            v = [v] if not isinstance(v, list) else v
+            for v0 in v:
+                dfc = get_single_filter_df(df, k, v0)
+                gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
+                x = gb[gb_param].unique()
+                gb_std = dfc.groupby([gb_param])[yaxis].std().reset_index()
+                y2 = gb[yaxis]
+                y1 = (gb[yaxis] - gb_std[yaxis]).map(lambda x: max(x,0))
+                y3 = gb[yaxis] + gb_std[yaxis]
+                ax.fill_between(x, y1, y3, color='grey', alpha='0.5')
+                ax.plot(x,y2)
+                param_dict = {k: v0}
+                tt = get_label_name(param_dict, True)
+                labels.append(tt)
+                lines, _ = ax.get_legend_handles_labels()
+                y_max = max(y_max, max(y2))
+    else:
+        gb = df.groupby([gb_param])[yaxis].mean().reset_index()
+        x = gb[gb_param].unique()
+        gb_std = df.groupby([gb_param])[yaxis].std().reset_index()
+        y2 = gb[yaxis]
+        y1 = (gb[yaxis] - gb_std[yaxis]).map(lambda x: max(x, 0))
+        y3 = gb[yaxis] + gb_std[yaxis]
+        ax.fill_between(x, y1, y3, color='grey', alpha='0.5')
+        ax.plot(x,y2)
+        tt = get_label_name(base_filter, True)
+        labels.append(tt)
+        lines, _ = ax.get_legend_handles_labels()
+        y_max = max(y_max, max(y2))
+
+    ax.legend(lines, labels, loc='best')
+    ax.set_title(title)
+    #ax.set_ylim([0, y_max*1.5])
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
     if savefig:
@@ -359,7 +420,7 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
 
     fig, ax = plt.subplots()
     labels = []
-
+    df = df[df.uniform == df.uniform2]
     df = get_base_filtered_df(df, base_filter)
 
     for k, v in lines_cases.items():
@@ -412,6 +473,7 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     df = df.query("privacy < 11")
     fig, ax = plt.subplots()
     labels = []
+    df = df[df.uniform == df.uniform2]
     for real in reals:
         for uniform in uniforms:
             for uniform2 in uniforms2:
