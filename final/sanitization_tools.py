@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 
-figures_path = "/home/juanzinser/Documents/plots/"
+figures_path = "/Users/juanzinser/Documents/plots/"
 def expo_weights(nclasses):
     weights = list()
     curr_weight = 1.
@@ -356,6 +356,7 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
 
+
 def plot_intervals_std(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  title=None, save_name=None):
     """
     Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
@@ -439,10 +440,16 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
             df_roc = pn.DataFrame({"fpr": xs, "tpr": ys}).sort_values(by="fpr", ascending=True)
             df_roc.loc[:, "fpr_dis"] = df_roc["fpr"].map(lambda x: round(x,2))
             gb = df_roc.groupby("fpr_dis")["tpr"].mean().reset_index().sort_values(by="fpr_dis", ascending=True)
+            gb_std = df_roc.groupby("fpr_dis")["tpr"].std().reset_index().sort_values(by="fpr_dis", ascending=True)
 
             x = gb.fpr_dis
             y = gb.tpr.rolling(window=3, center=False).mean() if len(gb) > 10 else gb.tpr
+            y_std = gb_std.tpr.rolling(window=3, center=False).mean() if len(gb) > 10 else gb_std.tpr
+            y1 = y - y_std
+            y3 = y + y_std
+            ax.fill_between(x, y1, y3, color='grey', alpha='0.5')
             ax.plot(x, y)
+
             lines, _ = ax.get_legend_handles_labels()
             param_dict = {k:v0}
             tt = get_label_name(param_dict)
