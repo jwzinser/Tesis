@@ -321,7 +321,8 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     xticks = list()
     xticks_locs = list()
     citer=0
-    if len(lines_cases)>0:
+    tendency_points = list()
+    if len(lines_cases) > 0:
         for k, v in lines_cases.items():
             v = [v] if not isinstance(v, list) else v
             for v0 in v:
@@ -334,15 +335,16 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
                 xticks.extend(x)
                 ind = np.arange(len(x))
                 xticks_locs.extend(ind+width)
+                tendency_points.append((ind + width, gb[yaxis]))
                 curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer%2],
                                 bottom=0, yerr=gb2[yaxis])
-                citer +=1
+                citer += 1
                 ps.append(curr_p)
                 param_dict = {k: v0}
                 tt = get_label_name(param_dict, True)
                 labels.append(tt)
                 width += width_delta
-
+    ax.plot([t1[0] for t1 in tendency_points], [t1[1] for t1 in tendency_points], lw=5, c="k")
     ax.set_title(title)
     #ax.set_xticks(ind + width_delta / 2)
     ax.set_xticks(xticks_locs)
