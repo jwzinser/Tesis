@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 
-figures_path = "/home/juanzinser/Documents/plots/"
+figures_path = "/Users/juanzinser/Documents/plots/"
 
 
 def expo_weights(nclasses):
@@ -326,6 +326,7 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
         for k, v in lines_cases.items():
             v = [v] if not isinstance(v, list) else v
             for v0 in v:
+
                 dfc = get_single_filter_df(df, k, v0)
 
                 gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
@@ -345,6 +346,65 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
                 labels.append(tt)
                 width += width_delta
     ax.plot([t1[0] for t1 in tendency_points], [t1[1] for t1 in tendency_points], lw=5, c="k")
+    ax.set_title(title)
+    #ax.set_xticks(ind + width_delta / 2)
+    ax.set_xticks(xticks_locs)
+    ax.set_ylabel(yaxis)
+    ax.set_xticklabels(xticks, rotation = 45, ha="right")
+    #ax.legend([p[0] for p in ps], labels)
+
+    ax.set_xlabel(gb_param.upper())
+    ax.set_ylabel(yaxis.upper())
+    if savefig:
+        plt.savefig(figures_path + save_name + ".png")
+    plt.show()
+
+
+def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_cases, savefig=False, title=None, save_name=None,
+                  width_delta=.2):
+    """
+    Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
+    Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
+
+    """
+    colors2 = {0:"b",1:"r","m":"g"}
+
+    fig, ax = plt.subplots()
+    pt = base_filter.get("privacy")
+    if pt is not None:
+        base_filter.pop("privacy")
+        df = df.query("privacy < {pt}".format(pt=pt))
+    df = df[df.uniform == df.uniform2]
+    df = get_base_filtered_df(df, base_filter)
+    ps = list()
+    labels = list()
+    width = 0
+    xticks = list()
+    xticks_locs = list()
+    citer=0
+    if len(lines_cases) > 0:
+        for k, v in lines_cases.items():
+            print(v)
+            v = [v] if not isinstance(v, list) else v
+            for v0 in v:
+                print(v0)
+                dfc = get_single_filter_df(df.copy(), k, v0)
+
+                gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
+                gb2 = dfc.groupby([gb_param])[yaxis].std().reset_index()
+
+                x = gb[gb_param].unique()
+                xticks.extend(x)
+                ind = np.arange(len(x))
+                xticks_locs.extend(ind+width)
+                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer%2],
+                                bottom=0, yerr=gb2[yaxis])
+                citer += 1
+                ps.append(curr_p)
+                param_dict = {k: v0}
+                tt = get_label_name(param_dict, True)
+                labels.append(tt)
+                width += width_delta
     ax.set_title(title)
     #ax.set_xticks(ind + width_delta / 2)
     ax.set_xticks(xticks_locs)
