@@ -293,7 +293,6 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
                 tt = get_label_name(param_dict, True, language)
                 labels.append(tt)
                 width += width_delta
-
     else:
         gb = df.groupby([gb_param])[yaxis].mean().reset_index()
         gb2 = df.groupby([gb_param])[yaxis].std().reset_index()
@@ -312,7 +311,7 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
     ax.set_ylabel(yaxis)
     x = label_rename(x, language)
     ax.set_xticklabels(x, rotation=45, ha="right")
-    ax.legend((p[0] for p in ps), labels)
+    ax.legend([list(p)[0] for p in ps], labels)
 
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
