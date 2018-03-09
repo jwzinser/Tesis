@@ -194,8 +194,20 @@ def get_auc_score_of_model(df, model):
     return prediction_error, roc_auc, roc_curve
 
 
-english_dict = {"t": "include", "f": "not-include", "m": "maybe"}
-spanish_dict = {"t": "incluido", "f": "no-incluido", "m": "tal vez"}
+english_dict = {"t": "include",
+                "f": "not-include",
+                "m": "maybe",
+                "privacy": "privacy",
+                "nclasses": "nclasses",
+                "real": "include real"}
+
+spanish_dict = {"t": "incluido",
+                "f": "no-incluido",
+                "m": "tal vez",
+                "nclasses": "Total Clases",
+                "privacy": "privacidad",
+                "real": "incluir real",
+                "auc": "area bajo la curva"}
 
 
 def label_rename(label_list, language="english"):
@@ -313,8 +325,12 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
     ax.set_xticklabels(x, rotation=45, ha="right")
     ax.legend([list(p)[0] for p in ps], labels)
 
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
@@ -327,7 +343,7 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
 
     """
-    colors2 = {0:"b",1:"r","m":"g"}
+    colors2 = {0:"b",1:"r","t":"g", "f":"r","m":"b"}
 
     fig, ax = plt.subplots()
     pt = base_filter.get("privacy")
@@ -358,7 +374,9 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
                 ind = np.arange(len(x))
                 xticks_locs.extend(ind+width)
                 tendency_points.append((ind + width, gb[yaxis]))
-                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer%2],
+                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer % 2],
+                                bottom=0, yerr=gb2[yaxis]) if gb_param == "privacy" else \
+                    ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[v0],
                                 bottom=0, yerr=gb2[yaxis])
                 citer += 1
                 ps.append(curr_p)
@@ -374,9 +392,12 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     xticks = label_rename(xticks, language)
     ax.set_xticklabels(xticks, rotation=45, ha="right")
     #ax.legend([p[0] for p in ps], labels)
-
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
@@ -389,7 +410,7 @@ def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_c
     Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
 
     """
-    colors2 = {0:"b",1:"r","m":"g"}
+    colors2 = {0:"b",1:"r","t":"g", "f":"r","m":"r"}
 
     fig, ax = plt.subplots()
     pt = base_filter.get("privacy")
@@ -419,7 +440,9 @@ def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_c
                 xticks.extend(x)
                 ind = np.arange(len(x))
                 xticks_locs.extend(ind+width)
-                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer%2],
+                curr_p = ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[citer % 2],
+                                bottom=0, yerr=gb2[yaxis]) if gb_param == "privacy" else \
+                    ax.bar(ind + width, gb[yaxis], width_delta, color=colors2[v0],
                                 bottom=0, yerr=gb2[yaxis])
                 citer += 1
                 ps.append(curr_p)
@@ -434,7 +457,9 @@ def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_c
     xticks = label_rename(xticks, language)
     ax.set_xticklabels(xticks, rotation = 45, ha="right")
     #ax.legend([p[0] for p in ps], labels)
-
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
     plt.tight_layout()
@@ -492,8 +517,12 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
     #ax.set_ylim([0, y_max*1.5])
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
@@ -550,8 +579,12 @@ def plot_intervals_std(df, gb_param, yaxis, base_filter, lines_cases, savefig=Fa
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
     #ax.set_ylim([0, y_max*1.5])
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
@@ -603,6 +636,7 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
     ax.set_title(tt)
     ax.set_xlabel("FPR")
     ax.set_ylabel("TPR")
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()  
@@ -676,8 +710,12 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
                                 labels.append(tt)
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
@@ -763,8 +801,12 @@ def rmse_auc_plot_with_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2
                                 labels.append(tt)
     ax.legend(lines, labels, loc='best')
     ax.set_title(title)
+    dict_use = english_dict if language == "english" else spanish_dict
+    gb_param = dict_use.get(gb_param.lower()) if dict_use.get(gb_param.lower()) else gb_param
+    yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
     plt.show()
