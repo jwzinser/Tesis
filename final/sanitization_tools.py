@@ -250,7 +250,7 @@ def get_single_filter_df(df, k, v):
         v = [v] if not isinstance(v, list) else v
         if k in df.columns:
             if np.issubdtype(df[k].dtype , np.number):
-                cond = " | ".join(["{k} == {val}".format(k=k, val=v0) for v0 in v])
+                cond = " | ".join(["{k} == {val}".format(k=k, val=float(v0)) for v0 in v])
                 df = df.query(cond)
             else:
                 cond = " | ".join(["{k} == '{val}'".format(k=k, val=v0) for v0 in v])
@@ -341,7 +341,6 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     """
     Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
     Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
-
     """
     colors2 = {0:"b",1:"r","t":"g", "f":"r","m":"b"}
 
@@ -364,7 +363,7 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
             v = [v] if not isinstance(v, list) else v
             for v0 in v:
 
-                dfc = get_single_filter_df(df, k, v0)
+                dfc = get_single_filter_df(df, k, str(v0))
 
                 gb = dfc.groupby([gb_param])[yaxis].mean().reset_index()
                 gb2 = dfc.groupby([gb_param])[yaxis].std().reset_index()
