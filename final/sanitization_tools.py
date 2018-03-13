@@ -205,7 +205,7 @@ spanish_dict = {"t": "incluido",
                 "f": "no-incluido",
                 "m": "tal vez",
                 "nclasses": "Total Clases",
-                "privacy": "privacidad",
+                "privacy": "dispersión",
                 "real": "incluir real",
                 "auc": "area bajo la curva"}
 
