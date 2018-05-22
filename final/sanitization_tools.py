@@ -178,8 +178,8 @@ def get_auc_score_of_model(df, model):
     class
     param model: classification model 
     """
-    X = df.loc[:,df.columns[:-1]]
-    y = (df.loc[:,df.columns[-1]] != " <=50K").astype(int)
+    X = df.loc[:,[col for col in df.columns if col != "salary-class"]]
+    y = (df.loc[:,"salary-class"] != " <=50K").astype(int)
     msk = np.random.rand(len(y)) < 0.8
     Xtrain = X[msk]
     ytrain = y[msk]
@@ -342,14 +342,15 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     Returns a line plot with quantile intervals of the RMSE of different levels of either privacy or number of classes.
     Works only for the non-supervised datasets since there are multiples simulations for provacy levels and numberr of classes.
     """
-    colors2 = {0:"b",1:"r","t":"g", "f":"r","m":"b"}
+    colors2 = {0:"b",1:"r", 2:"g", 3:"m", "t":"g", "f":"r","m":"b", "linear_regression":"b", "svm":"r", "naive_bayes":"g", "tree":"m"}
 
     fig, ax = plt.subplots()
     pt = base_filter.get("privacy")
     if pt is not None:
         base_filter.pop("privacy")
         df = df.query("privacy < {pt}".format(pt=pt))
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     df = get_base_filtered_df(df, base_filter)
     ps = list()
     labels = list()
@@ -416,7 +417,8 @@ def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_c
     if pt is not None:
         base_filter.pop("privacy")
         df = df.query("privacy < {pt}".format(pt=pt))
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     df = get_base_filtered_df(df, base_filter)
     ps = list()
     labels = list()
@@ -481,7 +483,8 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
         df = df.query("privacy < {pt}".format(pt=pt))
     df = get_base_filtered_df(df, base_filter)
     labels = []
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     y_max = 0
     if len(lines_cases)>0:
         for k, v in lines_cases.items():
@@ -541,7 +544,8 @@ def plot_intervals_std(df, gb_param, yaxis, base_filter, lines_cases, savefig=Fa
         df = df.query("privacy < {pt}".format(pt=pt))
     df = get_base_filtered_df(df, base_filter)
     labels = []
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     y_max = 0
     if len(lines_cases)>0:
         for k, v in lines_cases.items():
@@ -596,7 +600,8 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
 
     fig, ax = plt.subplots()
     labels = []
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     df = get_base_filtered_df(df, base_filter)
 
     for k, v in lines_cases.items():
@@ -620,6 +625,7 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
             x = gb.fpr_dis
             y = gb.tpr.rolling(window=3, center=False).mean() if len(gb) > 10 else gb.tpr
             y_std = gb_std.tpr.rolling(window=3, center=False).mean() if len(gb) > 10 else gb_std.tpr
+            y_std = gb_std.tpr
             y1 = y - y_std
             y3 = y + y_std
             ax.fill_between(x, y1, y3, color='grey', alpha='0.5')
@@ -657,7 +663,8 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     df = df.query("privacy < 11")
     fig, ax = plt.subplots()
     labels = []
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     for real in reals:
         for uniform in uniforms:
             for uniform2 in uniforms2:
@@ -736,7 +743,8 @@ def rmse_auc_plot_with_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2
     df = df.query("privacy < 11")
     fig, ax = plt.subplots()
     labels = []
-    df = df[df.uniform == df.uniform2]
+    if "uniform" in df.columns:    
+        df = df[df.uniform == df.uniform2]
     for real in reals:
         for uniform in uniforms:
             for uniform2 in uniforms2:
