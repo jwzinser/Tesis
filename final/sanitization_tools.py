@@ -4,11 +4,15 @@ from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 import sys
+from matplotlib.ticker import FormatStrFormatter, FuncFormatter, PercentFormatter
 
 
 figures_path = "/home/juanzinser/Documents/plots/" if sys.platform == "linux" \
     else "/Users/juanzinser/Documents/plots/"
 
+y_tick_format = '%.2f'
+y_tick_format_int = FuncFormatter(lambda x, pos: '{:,}'.format(x) )
+x_tick_percent = PercentFormatter(xmax=10)
 
 def expo_weights(nclasses):
     weights = list()
@@ -330,6 +334,7 @@ def plot_bars(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,  tit
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -397,6 +402,7 @@ def plot_bars_single_chunk(df, gb_param, yaxis, base_filter, lines_cases, savefi
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -463,6 +469,7 @@ def plot_bars_single_chunk_no_tendency(df, gb_param, yaxis, base_filter, lines_c
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -524,6 +531,12 @@ def plot_intervals(df, gb_param, yaxis, base_filter, lines_cases, savefig=False,
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    if yaxis=="auc":
+        ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
+    else:
+        ax.yaxis.set_major_formatter(y_tick_format_int)
+    if gb_param == "privacy":
+        ax.xaxis.set_major_formatter(x_tick_percent)
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -587,6 +600,9 @@ def plot_intervals_std(df, gb_param, yaxis, base_filter, lines_cases, savefig=Fa
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(y_tick_format_int)
+    if gb_param == "privacy":
+        ax.xaxis.set_major_formatter(x_tick_percent)
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -721,6 +737,7 @@ def rmse_auc_plot_no_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2, 
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
@@ -813,6 +830,9 @@ def rmse_auc_plot_with_intervals(df, gb_param, yaxis, reals, uniforms, uniforms2
     yaxis = dict_use.get(yaxis.lower()) if dict_use.get(yaxis.lower()) else yaxis
     ax.set_xlabel(gb_param.upper())
     ax.set_ylabel(yaxis.upper())
+    ax.yaxis.set_major_formatter(FormatStrFormatter(y_tick_format))
+    if gb_param == "privacy":
+        ax.xaxis.set_major_formatter(x_tick_percent)
     plt.tight_layout()
     if savefig:
         plt.savefig(figures_path + save_name + ".png")
