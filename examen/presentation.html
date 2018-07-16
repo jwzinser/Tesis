@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Un Operador de Sanitización de Datos</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Juan Zinser" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="portada.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Un Operador de Sanitización de Datos
+## Maestría en Ciencias en Computación
+### Juan Zinser
+### 2018/07/20
+
+---
+
+class: center, middle
+
+# Privacidad de Datos
+# Métodos de Sanitización
+# Enfoque Bases de Datos Negativas
+---
+class: inverse, center, middle
+# ¿Por qué es importante la privacidad de datos?
+---
+class: inverse, middle
+# Dos tipos de sanitización de bases:
+## Seguridad: impedir el acceso a los datos.
+## Privacidad: tener un acceso controlado a los datos.
+---
+class: inverse, center, middle
+# Privacidad de datos
++ ##¿Por qué es importante que los datos sean públicos?
+## Propician mejores políticas públicas
+## Incrementan la eficiencia de servicios
+## Mejoran la transparencia
+---
+class: inverse, left, middle
+# Modelos de ataque contra bases de datos
++ ## Attribute Leakage. 
++ ## Record Linkage. Concurso de Netflix.
+---
+class: center, middle
+# Intercambio Natural
+## 100% Utilidad - 0% Privacidad
+## 0% Utilidad - 100% Privacidad
+| Producto                  | Cantidad | Precio |
+|---------------------------|----------|--------|
+| Leche Deslactosada Borden | 2        | 15     |
+| Leche Chocolate Borden    | 3        | 17     |
+| Queso Manchego Nochebuena | 1        | 40     |
+| Detergente Ariel          | 1        | 70     |
+# 
+| Producto          | Cantidad | Subtotal |
+|-------------------|----------|----------|
+| Lácteos           | 6        | 121      |
+| Artículo Limpieza | 1        | 70       |
+---
+# Tipos de Sanitización
+.pull-left[
+Truncado
+
+Ruido Aleatorio
+
+Sampleo
+
+Discretización
+]
+
+.pull-right[
+Redondeo
+
+Generalización
+
+Microagregación
+
+Bases Negativas
+]
+
+---
+class: center, middle
+### Enfoque Sanitización Bases Negativas
+|     |     M|     C|     E|        `\(M_s\)` |        `\(C_s\)` |        `\(E_s\)` |
+|  ---| -----| -----| -----| -------------| -------------| -------------|
+|  0  |   1.0|   0.0|   0.0|   `\(\pi_{0,M}\)`|   `\(\pi_{0,C}\)`|   `\(\pi_{0,E}\)`|
+|  1  |   1.0|   0.0|   0.0|   `\(\pi_{1,M}\)`|   `\(\pi_{1,C}\)`|   `\(\pi_{1,E}\)`|
+|  2  |   0.0|   1.0|   0.0|   `\(\pi_{2,M}\)`|   `\(\pi_{2,C}\)`|   `\(\pi_{2,E}\)`|
+|  3  |   1.0|   0.0|   0.0|   `\(\pi_{3,M}\)`|   `\(\pi_{3,C}\)`|   `\(\pi_{3,E}\)`|
+|  4  |   1.0|   0.0|   0.0|   `\(\pi_{4,M}\)`|   `\(\pi_{4,C}\)`|   `\(\pi_{4,E}\)`|
+|  5  |   1.0|   0.0|   0.0|   `\(\pi_{5,M}\)`|   `\(\pi_{5,C}\)`|   `\(\pi_{5,E}\)`|
+|  6  |   1.0|   0.0|   0.0|   `\(\pi_{6,M}\)`|   `\(\pi_{6,C}\)`|   `\(\pi_{6,E}\)`|
+|  7  |   1.0|   0.0|   0.0|   `\(\pi_{7,M}\)`|   `\(\pi_{7,C}\)`|   `\(\pi_{7,E}\)`|
+|  8  |   1.0|   0.0|   0.0|   `\(\pi_{8,M}\)`|   `\(\pi_{8,C}\)`|   `\(\pi_{8,E}\)`|
+|  9  |   0.0|   0.0|   1.0|   `\(\pi_{9,M}\)`|   `\(\pi_{9,C}\)`|   `\(\pi_{9,E}\)`|
+#### `\(\sum_{j=0}^{nclasses}\pi_{i,j}=1.0\)`, `\(\pi_{i,j}\geq 0\)`
+---
+class: center, middle
+# Características del operador propuesto
+## Inclusión del valor real
+## Privacidad 
+## Distribución de peso
+---
+# Resultados del operador sobre una base de datos
+## Ejemplo 
+| Columna           | Núm. Clases |
+|-------------------|-------------|
+| categoría laboral | 9           |
+| educación         | 16          |
+| estado civil      | 7           |
+| ocupación         | 15          |
+| raza              | 5           |
+| género            | 2           |
+| país origen       | 42          |
+---
+class: inverse
+# Nos efocaremos en Utilidad dentro del intercambio de Privacidad-Utilidad.
+# Dos formas de medir la utilidad de la tabla.
++ ## Utilidad medida por medio de métodos de aprendizaje de máquina.
++ ## Utilidad medida por medio de reconstrucción de histogramas. 
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_is_real.png)
+background-size: 512px
+background-position: 45% 10%
+## Utilidad medida por medio de mÃ©todos de aprendizaje de mÃ¡quina.
+## No incluir el valor real presenta una mejor utilidad.
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_auc_t.png)
+background-size: 512px
+background-position: 45% 10%
+## Destaca la estabilidad en los dos "escalones".
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_auc_f.png)
+background-size: 512px
+background-position: 45% 10%
+## Destaca la pendiente positiva en los primeros niveles de privacidad.
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/uniform_model.png)
+background-size: 512px
+background-position: 45% 10%
+## No parece haber efecto del modelo con la distribución de pesos.
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/include_real_model.png)
+background-size: 512px
+background-position: 45% 5%
+## El modelo Naive Bayes tiene un mejor desempeÃ±o cuando el valor real no es incluido sobre el Ã¡rbol de regresión, mientras que los demÃ¡s modelos tienen un comportamiento independiente de la inclusión del valor real.
+---
+class: center, bottom
+## Ejemplo de reconstrucción de histograma
+
+|Original|M|C|E| |Sanitizada|M|C|E|
+|--|--|--|--|--|--|--|--|--|
+|0|1.0|0.0|0.0||0|0.0|0.5|0.5|
+|1|1.0|0.0|0.0||1|0.0|0.5|0.5|
+|2|0.0|1.0|0.0||2|0.5|0.0|0.5|
+|3|1.0|0.0|0.0||3|0.0|0.5|0.5|
+|4|1.0|0.0|0.0||4|0.0|0.5|0.5|
+|5|1.0|0.0|0.0||5|0.0|0.5|0.5|
+|6|1.0|0.0|0.0||6|0.0|0.5|0.5|
+|7|1.0|0.0|0.0||7|0.0|0.5|0.5|
+|8|1.0|0.0|0.0||8|0.0|0.5|0.5|
+|9|0.0|0.0|1.0||9|0.5|0.5|0.0|
+|total|8.0|1.0|1.0||total|1.0|4.5|4.5|
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/reconstruction_simulated_example.png)
+background-size: 512px
+background-position: 45% 10%
+## Ejemplo de reconstrucción de histograma
+## Chi-cuadrada `\(\chi^2  = \sum_{i=1}^n\frac{(NIS_i-CIS_i)^2}{CIS_i}\)`
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy.png)
+background-size: 512px
+background-position: 45% 10%
+## DespuÃ©s de un nivel de dispersiÃ³n mayor al 40%, pierde relevancia la inclusiÃ³n o no inclusiÃ³n del valor real. 
+---
+class: center, bottom, inverse
+background-image: url(file:///home/juanzinser/Documents/plots/dataday/nclasses.png)
+background-size: 512px
+background-position: 42% 10%
+## El peor desempeño ocurre cuando la distribución de los datos es uniforme y los datos originales tienen una distribución exponencial.
+---
+class: middle, center, inverse
+background-image: url(resources/DataDay-logo.png)
+background-size: 256px
+background-position: 93% 5%
+## ¡Gracias!
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+});
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
