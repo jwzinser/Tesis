@@ -1,43 +1,36 @@
 ---
-title: "Un Operador de SanitizaciÛn de Datos"
-subtitle: "MaestrÌa en Ciencias en ComputaciÛn"
+title: "Un Operador de Sanitizaci√≥n de Datos"
+subtitle: "Maestr√≠a en Ciencias en Computaci√≥n"
 author: "Juan Zinser"
-date: "2018/07/20"
+date: "2018/07/24"
 output:
   xaringan::moon_reader:
-    css: ["default", "portada.css"]
     lib_dir: libs
+    yolo: true
     nature:
-      ratio: '16:9'
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
 ---
 class: center, middle
-
 # Privacidad de Datos
-# MÈtodos de SanitizaciÛn
+# M√©todos de Sanitizaci√≥n
 # Enfoque Bases de Datos Negativas
 ---
 class: inverse, center, middle
-# øPor quÈ es importante la privacidad de datos?
+# ¬øPor qu√© es importante la privacidad de datos?
 ---
 class: inverse, middle
-# Dos tipos de sanitizaciÛn de bases:
+# Dos tipos de sanitizaci√≥n de bases:
 ## Seguridad: impedir el acceso a los datos.
 ## Privacidad: tener un acceso controlado a los datos.
 ---
 class: inverse, center, middle
 # Privacidad de datos
-+ ##øPor quÈ es importante que los datos sean p˙blicos?
-## Propician mejores polÌticas p˙blicas
++ ##¬øPor qu√© es importante que los datos sean p√∫blicos?
+## Propician mejores pol√≠ticas p√∫blicas
 ## Incrementan la eficiencia de servicios
 ## Mejoran la transparencia
----
-class: inverse, left, middle
-# Modelos de ataque contra bases de datos
-+ ## Attribute Leakage. 
-+ ## Record Linkage. Concurso de Netflix.
 ---
 class: center, middle
 # Intercambio Natural
@@ -52,10 +45,10 @@ class: center, middle
 # 
 | Producto          | Cantidad | Subtotal |
 |-------------------|----------|----------|
-| L·cteos           | 6        | 121      |
-| ArtÌculo Limpieza | 1        | 70       |
+| L√°cteos           | 6        | 121      |
+| Art√≠culo Limpieza | 1        | 70       |
 ---
-# Tipos de SanitizaciÛn
+# Tipos de Sanitizaci√≥n
 .pull-left[
 Truncado
 
@@ -63,22 +56,22 @@ Ruido Aleatorio
 
 Sampleo
 
-DiscretizaciÛn
+Discretizaci√≥n
 ]
 
 .pull-right[
 Redondeo
 
-GeneralizaciÛn
+Generalizaci√≥n
 
-MicroagregaciÛn
+Microagregaci√≥n
 
 Bases Negativas
 ]
 
 ---
 class: center, middle
-### Enfoque SanitizaciÛn Bases Negativas
+### Enfoque Sanitizaci√≥n Bases Negativas
 |     |     M|     C|     E|        $M_s$ |        $C_s$ |        $E_s$ |
 |  ---| -----| -----| -----| -------------| -------------| -------------|
 |  0  |   1.0|   0.0|   0.0|   $\pi_{0,M}$|   $\pi_{0,C}$|   $\pi_{0,E}$|
@@ -94,62 +87,62 @@ class: center, middle
 #### $\sum_{j=0}^{nclasses}\pi_{i,j}=1.0$, $\pi_{i,j}\geq 0$
 ---
 class: center, middle
-# CaracterÌsticas del operador propuesto
-## InclusiÛn del valor real
+# Caracter√≠sticas del operador propuesto
+## Inclusi√≥n del valor real
 ## Privacidad 
-## DistribuciÛn de peso
+## Distribuci√≥n de peso
 ---
 # Resultados del operador sobre una base de datos
 ## Ejemplo 
-| Columna           | N˙m. Clases |
+| Columna           | N√∫m. Clases |
 |-------------------|-------------|
-| categorÌa laboral | 9           |
-| educaciÛn         | 16          |
+| categor√≠a laboral | 9           |
+| educaci√≥n         | 16          |
 | estado civil      | 7           |
-| ocupaciÛn         | 15          |
+| ocupaci√≥n         | 15          |
 | raza              | 5           |
-| gÈnero            | 2           |
-| paÌs origen       | 42          |
+| g√©nero            | 2           |
+| pa√≠s origen       | 42          |
 ---
 class: inverse
 # Nos efocaremos en Utilidad dentro del intercambio de Privacidad-Utilidad.
 # Dos formas de medir la utilidad de la tabla.
-+ ## Utilidad medida por medio de mÈtodos de aprendizaje de m·quina.
-+ ## Utilidad medida por medio de reconstrucciÛn de histogramas. 
++ ## Utilidad medida por medio de m√©todos de aprendizaje de m√°quina.
++ ## Utilidad medida por medio de reconstrucci√≥n de histogramas. 
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_is_real.png)
+background-image: url(file:///home/juanzinser/Documents/plots/exam/privacy_is_real.png)
 background-size: 512px
 background-position: 45% 10%
 ## Utilidad medida por medio de m√©todos de aprendizaje de m√°quina.
 ## No incluir el valor real presenta una mejor utilidad.
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_auc_t.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/privacy_auc_t.png)
 background-size: 512px
 background-position: 45% 10%
 ## Destaca la estabilidad en los dos "escalones".
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy_auc_f.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/privacy_auc_f.png)
 background-size: 512px
 background-position: 45% 10%
 ## Destaca la pendiente positiva en los primeros niveles de privacidad.
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/uniform_model.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/uniform_model.png)
 background-size: 512px
 background-position: 45% 10%
-## No parece haber efecto del modelo con la distribuciÛn de pesos.
+## No parece haber efecto del modelo con la distribuci√≥n de pesos.
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/include_real_model.png)
+background-image: url(/Users/juanzinser/Documents/plots/include_real_model.png)
 background-size: 512px
 background-position: 45% 5%
-## El modelo Naive Bayes tiene un mejor desempe√±o cuando el valor real no es incluido sobre el √°rbol de regresiÛn, mientras que los dem√°s modelos tienen un comportamiento independiente de la inclusiÛn del valor real.
+## El modelo Naive Bayes tiene un mejor desempe√±o cuando el valor real no es incluido sobre el √Årbol de regresi√≥n, mientras que los dem√É¬°s modelos tienen un comportamiento independiente de la inclusi√≥n del valor real.
 ---
 class: center, bottom
-## Ejemplo de reconstrucciÛn de histograma
+## Ejemplo de reconstrucci√≥n de histograma
 
 |Original|M|C|E| |Sanitizada|M|C|E|
 |--|--|--|--|--|--|--|--|--|
@@ -166,26 +159,23 @@ class: center, bottom
 |total|8.0|1.0|1.0||total|1.0|4.5|4.5|
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/reconstruction_simulated_example.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/reconstruction_simulated_example.png)
 background-size: 512px
 background-position: 45% 10%
-## Ejemplo de reconstrucciÛn de histograma
+## Ejemplo de reconstrucci√≥n de histograma
 ## Chi-cuadrada $\chi^2  = \sum_{i=1}^n\frac{(NIS_i-CIS_i)^2}{CIS_i}$
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/privacy.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/privacy.png)
 background-size: 512px
 background-position: 45% 10%
-## Despu√©s de un nivel de dispersi√≥n mayor al 40%, pierde relevancia la inclusi√≥n o no inclusi√≥n del valor real. 
+## Despu√©s de un nivel de dispers√≥n mayor al 40%, pierde relevancia la inclusi√≥n o no inclusi√≥n del valor real. 
 ---
 class: center, bottom, inverse
-background-image: url(file:///home/juanzinser/Documents/plots/dataday/nclasses.png)
+background-image: url(file:///Users/juanzinser/Documents/plots/exam/nclasses.png)
 background-size: 512px
 background-position: 42% 10%
-## El peor desempeÒo ocurre cuando la distribuciÛn de los datos es uniforme y los datos originales tienen una distribuciÛn exponencial.
+## El peor desempe√±o ocurre cuando la distribuci√≥n de los datos es uniforme y los datos originales tienen una distribuci√≥n exponencial.
 ---
 class: middle, center, inverse
-background-image: url(resources/DataDay-logo.png)
-background-size: 256px
-background-position: 93% 5%
-## °Gracias!
+## ¬°Gracias!
