@@ -1,6 +1,6 @@
 ---
 title: "Data Day Sanitization"
-subtitle: "⚔<br/>with xaringan"
+subtitle: "â<br/>with xaringan"
 author: "Juan Zinser"
 date: "2016/12/12"
 output:
@@ -28,7 +28,7 @@ class: center, middle
 
 # xaringan
 
-### /ʃæ.'riŋ.ɡæn/
+### /ÊÃ¦.'riÅ.É¡Ã¦n/
 
 ---
 class: inverse, center, middle
@@ -78,7 +78,7 @@ You are recommended to use the [RStudio IDE](https://www.rstudio.com/products/rs
 - or use the [RStudio Addin](https://rstudio.github.io/rstudioaddins/)<sup>2</sup> "Infinite Moon Reader" to live preview the slides (every time you update and save the Rmd document, the slides will be automatically reloaded in RStudio Viewer.
 
 .footnote[
-[1] 中文用户请看[这份教程](http://slides.yihui.name/xaringan/zh-CN.html)
+[1] ä¸­æç¨æ·è¯·ç[è¿ä»½æç¨](http://slides.yihui.name/xaringan/zh-CN.html)
 
 [2] See [#2](https://github.com/yihui/xaringan/issues/2) if you do not see the template or addin in RStudio.
 ]
@@ -215,8 +215,8 @@ Limitations:
 # a boring regression
 fit = lm(dist ~ 1 + speed, data = cars)
 coef(summary(fit))
-dojutsu = c('地爆天星', '天照', '加具土命', '神威', '須佐能乎', '無限月読')
-grep('天', dojutsu, value = TRUE)
+dojutsu = c('å°çå¤©æ', 'å¤©ç§', 'å å·åå½', 'ç¥å¨', 'é ä½è½ä¹', 'ç¡éæèª­')
+grep('å¤©', dojutsu, value = TRUE)
 ```
 
 ---
@@ -525,7 +525,7 @@ background-position: 90% 8%
 
 # Sharingan
 
-The R package name **xaringan** was derived<sup>1</sup> from **Sharingan**, a dōjutsu in the Japanese anime _Naruto_ with two abilities:
+The R package name **xaringan** was derived<sup>1</sup> from **Sharingan**, a dÅjutsu in the Japanese anime _Naruto_ with two abilities:
 
 - the "Eye of Insight"
 
@@ -534,7 +534,7 @@ The R package name **xaringan** was derived<sup>1</sup> from **Sharingan**, a d�
 I think a presentation is basically a way to communicate insights to the audience, and a great presentation may even "hypnotize" the audience.<sup>2,3</sup>
 
 .footnote[
-[1] In Chinese, the pronounciation of _X_ is _Sh_ /ʃ/ (as in _shrimp_). Now you should have a better idea of how to pronounce my last name _Xie_.
+[1] In Chinese, the pronounciation of _X_ is _Sh_ /Ê/ (as in _shrimp_). Now you should have a better idea of how to pronounce my last name _Xie_.
 
 [2] By comparison, bad presentations only put the audience to sleep.
 
@@ -547,15 +547,15 @@ I think a presentation is basically a way to communicate insights to the audienc
 
 The **xaringan** package borrowed a few terms from Naruto, such as
 
-- [Sharingan](http://naruto.wikia.com/wiki/Sharingan) (写輪眼; the package name)
+- [Sharingan](http://naruto.wikia.com/wiki/Sharingan) (åè¼ªç¼; the package name)
 
-- The [moon reader](http://naruto.wikia.com/wiki/Moon_Reader) (月読; an attractive R Markdown output format)
+- The [moon reader](http://naruto.wikia.com/wiki/Moon_Reader) (æèª­; an attractive R Markdown output format)
 
-- [Chakra](http://naruto.wikia.com/wiki/Chakra) (查克拉; the path to the remark.js library, which is the power to drive the presentation)
+- [Chakra](http://naruto.wikia.com/wiki/Chakra) (æ¥åæ; the path to the remark.js library, which is the power to drive the presentation)
 
-- [Nature transformation](http://naruto.wikia.com/wiki/Nature_Transformation) (性質変化; transform the chakra by setting different options)
+- [Nature transformation](http://naruto.wikia.com/wiki/Nature_Transformation) (æ§è³ªå¤å; transform the chakra by setting different options)
 
-- The [infinite moon reader](http://naruto.wikia.com/wiki/Infinite_Tsukuyomi) (無限月読; start a local web server to continuously serve your slides)
+- The [infinite moon reader](http://naruto.wikia.com/wiki/Infinite_Tsukuyomi) (ç¡éæèª­; start a local web server to continuously serve your slides)
 
 - The [summoning technique](http://naruto.wikia.com/wiki/Summoning_Technique) (download remark.js from the web)
 
@@ -565,7 +565,7 @@ You can click the links to know more about them if you want. The jutsu "Moon Rea
 
 class: center
 
-# Hand seals (印)
+# Hand seals (å°)
 
 Press `h` or `?` to see the possible ninjutsu you can use in remark.js.
 
