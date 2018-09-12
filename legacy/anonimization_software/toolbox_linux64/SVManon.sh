@@ -1,1 +1,0 @@
-java -cp sqlite.jar:anon_toolbox.jar:svm_anon.jar:. -Djava.library.path=. methods.ExpScenario -arff dataset/header.txt
