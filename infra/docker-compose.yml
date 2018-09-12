@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+
+  dask_scheduler:
+      image: 982989130295.dkr.ecr.us-west-2.amazonaws.com/datank/dask-node:0.1
+      entrypoint: dask-scheduler
+      volumes:
+          - ../config/dask.yaml:/etc/dask/dask.yaml
+      environment:
+          - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+          - DASK_CONFIG=/etc/dask/dask.yaml
+      ports:
+          - 8786:8786
+          - 8787:8787
+          - 8788:8788
+          - 8789:8789
+
+  dask_worker:
+      image: 982989130295.dkr.ecr.us-west-2.amazonaws.com/datank/dask-node:0.1
+      entrypoint: dask-worker dask_scheduler:8786 --nthreads=8 --memory-limit=10e9
+      volumes:
+          - ../config/dask.yaml:/etc/dask/dask.yaml
+      environment:
+          - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+          - DASK_CONFIG=/etc/dask/dask.yaml
+
+volumes:
+    data-volume:
