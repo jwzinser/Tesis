@@ -5,7 +5,7 @@ from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_ba
 from collections import Counter
 import sys
 from matplotlib.ticker import FormatStrFormatter, FuncFormatter, PercentFormatter
-
+import math
 
 figures_path = "/home/juanzinser/Documents/plots/" if sys.platform == "linux" \
     else "/Users/juanzinser/Documents/plots/"
@@ -13,6 +13,13 @@ figures_path = "/home/juanzinser/Documents/plots/" if sys.platform == "linux" \
 y_tick_format = '%.2f'
 y_tick_format_int = FuncFormatter(lambda x, pos: '{:,}'.format(x) )
 x_tick_percent = PercentFormatter(xmax=10)
+
+
+def check_include_real(include_real, privacy, class_length):
+    if (privacy - include_real) >= class_length:
+        include_real = True
+    return include_real
+
 
 def expo_weights(nclasses):
     weights = list()
@@ -34,7 +41,7 @@ def weights_to_probabilities(weights_vector, sum_to=1.):
 def entry_sanitization(entry, real_prob, class_length,
                        maybe, uniform, uniform2, include_real,
                        privacy, order_weights, key_to_order,
-                       order_exception, ordered_weights):
+                       order_exception, ordered_weights, counter):
     """
     Sanitizes a single record
 
@@ -56,6 +63,7 @@ def entry_sanitization(entry, real_prob, class_length,
     # total number of classes
     privacy_fraction = 1. / privacy
     entry_vector = np.zeros(class_length)
+    #print(entry)
     if not maybe:
         # gets the weights of each class excluding the real
         # value class
@@ -115,36 +123,10 @@ def entry_sanitization(entry, real_prob, class_length,
     return entry_vector
 
 
-def operator_model(original_list, privacy=3, include_real=True,
-                   uniform=True, uniform2=True, real_prob=None,
-                   maybe=False):
-    """
-    :param original_list:
-    :param privacy:
-    :param include_real:
-    :param uniform:
-    :param uniform2:
-    :param real_prob: if uniform is false and include_real true,
-    the real value will be given this probability
-    :param maybe: if the maybe is true, include real is ignored
-    :return:
-    """
-    # gets the real frequencies and calculates the changes
-    # for the new_value for each possible case
-    counts = Counter(original_list)
-    total = sum(counts.values())
-    class_length = len(counts)
-    privacy = min(privacy, class_length)
-    if (privacy - include_real) >= class_length:
-        include_real = True
-
-    # correspondence of the ordered index of each of the classes
-    key_to_order = dict(zip(sorted(counts.keys()),
-                            range(class_length)))
+def get_owoe(class_length, key_to_order, ordered_weights):
+    
     order_exception = dict()
     order_weights = dict()
-    ordered_weights = [float(counts[key]) / total for
-                       key in sorted(counts.keys())]
 
     # gets two dictionaries, order exception and ordered weights
     for key in range(class_length):
@@ -160,18 +142,41 @@ def operator_model(original_list, privacy=3, include_real=True,
         # order weights contains the equivalent to order
         # exception but with the corresponding weights instead
         order_weights[key] = all_non_entry_ordered_weights
+        
+    return order_exception, order_weights
 
-    negative_list = [entry_sanitization(
-        i, real_prob, class_length, maybe, uniform, uniform2,
-        include_real, privacy, order_weights, key_to_order,
-        order_exception, ordered_weights)
-        for i in original_list]
 
-    result_dict = dict()
-    for idx, field in enumerate(sorted(counts.keys())):
-        result_dict[field] = [i[idx] for i in negative_list]
 
-    return result_dict
+
+
+
+def get_meta_info(data, cat_columns, privacy, include_real, uniform, uniform2, maybe, client):
+    meta_data = client.gather(client.compute({col: {"privacy": math.ceil(privacy*len(data[col].unique())),
+                                                 "counter": data[col].value_counts()} for col in cat_columns}))
+    meta_data = {col:{"privacy":min(val["privacy"],len(val["counter"])), 
+                      "class_length":len(val["counter"]),
+                      "counter":val["counter"].to_dict()}
+                 for col, val in meta_data.items()}
+
+    meta_info = {"df":{"n":len(data)},
+                 "columns":meta_data,
+                "algorithm":{"uniform":uniform,
+                            "uniform2":uniform2,
+                            "real_prob":None,
+                            "maybe":maybe}}
+
+    # the meta info should include de get_owoe() information
+    for col, col_info in meta_info["columns"].items():
+        meta_info["columns"][col]["include_real"] = check_include_real(include_real, col_info["privacy"], col_info["class_length"])
+        key_to_order =  dict(zip(sorted(col_info["counter"].keys()), range(col_info["class_length"])))
+        ordered_weights = [float(col_info["counter"][key]) / meta_info["df"]["n"] for key in sorted(col_info["counter"].keys())]
+        meta_info["columns"][col]["ordered_weights"] = ordered_weights
+        meta_info["columns"][col]["key_to_order"] = key_to_order
+        order_exception, order_weights = get_owoe(col_info["class_length"], key_to_order, ordered_weights)
+        meta_info["columns"][col]["order_exception"] = order_exception
+        meta_info["columns"][col]["order_weights"] = order_weights
+    
+    return meta_info
 
 
 def get_auc_score_of_model(df, model):
@@ -182,8 +187,12 @@ def get_auc_score_of_model(df, model):
     class
     param model: classification model 
     """
-    X = df.loc[:,[col for col in df.columns if col != "salary-class"]]
-    y = (df.loc[:,"salary-class"] != " <=50K").astype(int)
+    data_x = dataa[[col for col in dataa.columns if col != "y"]]
+    data_y = dataa["y"].astype(str)
+    
+    X = df.loc[:,[col for col in df.columns if col != "y"]]
+    y = df.loc[:,"y"]
+    # this could be done using cross validation for better confidence
     msk = np.random.rand(len(y)) < 0.8
     Xtrain = X[msk]
     ytrain = y[msk]
@@ -195,7 +204,10 @@ def get_auc_score_of_model(df, model):
     prediction_error = 1 - sum((ytest == predicted).astype(int))/float(len(ytest))
     roc_auc = metrics.roc_auc_score(ytest, predicted_score)
     roc_curve = metrics.roc_curve(ytest, predicted_score)
+                  
     return prediction_error, roc_auc, roc_curve
+
+
 
 
 english_dict = {"t": "include",
