@@ -187,8 +187,8 @@ def get_auc_score_of_model(df, model):
     class
     param model: classification model 
     """
-    data_x = dataa[[col for col in dataa.columns if col != "y"]]
-    data_y = dataa["y"].astype(str)
+    data_x = df[[col for col in df.columns if col != "y"]]
+    data_y = df["y"].astype(str)
     
     X = df.loc[:,[col for col in df.columns if col != "y"]]
     y = df.loc[:,"y"]
