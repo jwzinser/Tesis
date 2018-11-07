@@ -150,9 +150,15 @@ def get_owoe(class_length, key_to_order, ordered_weights):
 
 
 
-def get_meta_info(data, cat_columns, privacy, include_real, uniform, uniform2, maybe, client):
-    meta_data = client.gather(client.compute({col: {"privacy": math.ceil(privacy*len(data[col].unique())),
-                                                 "counter": data[col].value_counts()} for col in cat_columns}))
+def get_meta_info(data, cat_columns, privacy, include_real, uniform, uniform2, maybe, client, benchmark=False):
+    
+    if not benchmark:
+        meta_data = client.gather(client.compute({col: {"privacy": math.ceil(privacy*len(data[col].unique())),
+                                                     "counter": data[col].value_counts()} for col in cat_columns}))
+    else:
+        meta_data = client.gather(client.compute({col: {"privacy": 1,
+                                                     "counter": data[col].value_counts()} for col in cat_columns}))
+
     meta_data = {col:{"privacy":min(val["privacy"],len(val["counter"])), 
                       "class_length":len(val["counter"]),
                       "counter":val["counter"].to_dict()}
@@ -178,6 +184,39 @@ def get_meta_info(data, cat_columns, privacy, include_real, uniform, uniform2, m
     
     return meta_info
 
+
+def get_meta_info_pandas(data, cat_columns, privacy, include_real, uniform, uniform2, maybe, benchmark=False):
+    
+    if not benchmark:
+        meta_data = {col: {"privacy": math.ceil(privacy*len(data[col].unique())),
+                                                     "counter": dict(Counter(data[col]))} for col in cat_columns}
+    else:
+        meta_data = {col: {"privacy": 1,"counter": dict(Counter(data[col]))} for col in cat_columns}
+
+    meta_data = {col:{"privacy":min(val["privacy"],len(val["counter"])), 
+                      "class_length":len(val["counter"]),
+                      "counter": dict(val["counter"])}
+                 for col, val in meta_data.items()}
+
+    meta_info = {"df":{"n":len(data)},
+                 "columns":meta_data,
+                "algorithm":{"uniform":uniform,
+                            "uniform2":uniform2,
+                            "real_prob":None,
+                            "maybe":maybe}}
+
+    # the meta info should include de get_owoe() information
+    for col, col_info in meta_info["columns"].items():
+        meta_info["columns"][col]["include_real"] = check_include_real(include_real, col_info["privacy"], col_info["class_length"])
+        key_to_order =  dict(zip(sorted(col_info["counter"].keys()), range(col_info["class_length"])))
+        ordered_weights = [float(col_info["counter"][key]) / meta_info["df"]["n"] for key in sorted(col_info["counter"].keys())]
+        meta_info["columns"][col]["ordered_weights"] = ordered_weights
+        meta_info["columns"][col]["key_to_order"] = key_to_order
+        order_exception, order_weights = get_owoe(col_info["class_length"], key_to_order, ordered_weights)
+        meta_info["columns"][col]["order_exception"] = order_exception
+        meta_info["columns"][col]["order_weights"] = order_weights
+    
+    return meta_info
 
 def get_auc_score_of_model(df, model):
     """
