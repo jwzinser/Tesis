@@ -282,7 +282,7 @@ def get_single_filter_df(df, k, v):
     """
     Applies a filter to a pandas DataFrame, which might me a multiple condition
     """
-    if v:
+    if v is not None:
         v = [v] if not isinstance(v, list) else v
         if k in df.columns:
             if np.issubdtype(df[k].dtype , np.number):
