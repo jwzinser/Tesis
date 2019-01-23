@@ -104,6 +104,91 @@ def entry_sanitization(entry, real_prob, class_length,
     return entry_vector
 
 
+
+
+def entry_sanitization_with_maybe(entry, real_prob, class_length,
+                       maybe, uniform, uniform2, include_real,
+                       privacy, order_weights, key_to_order,
+                       order_exception, ordered_weights, counter):
+    """
+    Sanitizes a single record
+    :param entry:
+    :param real_prob:
+    :param class_length:
+    :param maybe:
+    :param uniform:
+    :param uniform2:
+    :param include_real:
+    :param privacy:
+    :param order_weights:
+    :param key_to_order:
+    :param order_exception:
+    :param ordered_weights:
+    :return:
+    """
+    # initializes the entry_vector, same size as the
+    # total number of classes
+    privacy_fraction = 1. / privacy
+    entry_vector = np.zeros(class_length)
+    #print(entry)
+    if not maybe:
+        # gets the weights of each class excluding the real
+        # value class
+        weights = [1. / (class_length - 1)] * \
+                  (class_length - 1) if uniform else \
+            order_weights[key_to_order[entry]]
+
+        # makes the weights sum one
+        weights = weights_to_probabilities(weights)
+
+        # get sample of the indexes that will have a
+        # non zero weight (real not considered)
+        non_real_weights = np.random.choice(
+            order_exception[key_to_order[entry]],
+            privacy - include_real, False, p=weights)
+
+        # save the corresponding weights into their
+        # corresponding index for all the sampled
+        # indexes in the previous step
+        entry_vector[non_real_weights] = privacy_fraction if \
+            uniform2 else [ordered_weights[i] for
+                           i in non_real_weights]
+
+        # if real prob is None set to the proportional weight
+        real_prob = ordered_weights[key_to_order[entry]] if \
+            real_prob is None else real_prob
+
+        # gets the weight that will be assigned to
+        # the real value
+        real_value = (privacy_fraction if uniform2 else
+                      real_prob) if include_real else 0
+        entry_vector = weights_to_probabilities(
+            entry_vector, 1 - real_value)
+
+        entry_vector[key_to_order[entry]] = real_value
+        entry_vector = weights_to_probabilities(entry_vector)
+    else:
+        # gets the weights of each class excluding the
+        # real value class
+        weights = [1. / class_length] * class_length if \
+            uniform else ordered_weights
+
+        # get sample of the indexes that will have a non
+        # zero weight
+        selected_weights = np.random.choice(
+            list(range(class_length)), privacy,
+            False, p=weights)
+
+        # save the corresponding weights into their
+        # corresponding index
+        # for all the sampled indexes in the previous step
+        entry_vector[selected_weights] = privacy_fraction if \
+            uniform2 else [ordered_weights[i]
+                           for i in selected_weights]
+        entry_vector = weights_to_probabilities(entry_vector)
+
+    return entry_vector
+
 def get_owoe(class_length, key_to_order, ordered_weights):
     
     order_exception = dict()
