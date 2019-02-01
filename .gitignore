@@ -4,6 +4,8 @@ venv/*
 *.csv
 *.dirlock
 **.dirlock
+parallel/dask-worker-space/*.dirlock
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
