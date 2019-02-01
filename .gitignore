@@ -2,6 +2,7 @@ anonimization_software/*
 postcursos/*
 venv/*
 *.csv
+*.dirlock
 **.dirlock
 # Byte-compiled / optimized / DLL files
 __pycache__/
