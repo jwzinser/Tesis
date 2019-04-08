@@ -15,6 +15,46 @@ y_tick_format = '%.2f'
 y_tick_format_int = FuncFormatter(lambda x, pos: '{:,}'.format(x) )
 x_tick_percent = PercentFormatter(xmax=10)
 
+from sklearn.decomposition import PCA
+import mca
+
+# make a function that gets a df with dimantinality reduction applied
+# the two types of dimentinality reduction are the mcs for categorical variables and pca for numerical variables
+# after getting these two partially reducted dfs, a sinngle df if prodcued as the summary of these two.
+def clean_dataset(df, dfy):
+    assert isinstance(df, pd.DataFrame), "df needs to be a pd.DataFrame"
+    #df.dropna(inplace=True)
+    indices_to_keep = ~df.isin([np.nan, np.inf, -np.inf]).any(1)
+    
+    return df[indices_to_keep].astype(np.float64), dfy[indices_to_keep.values]
+def dim_reduction(df, y_col, num_dim=2, cat_dim=2, final_dim=2):
+    df = df.sample(int(.1*len(df)))
+    cols = df.columns  
+    # selects categorical data
+    std_cols = list(set(df.select_dtypes(["number"]).columns).difference({y_col}))
+    cat_cols = list(set(df.select_dtypes(["bool_", "object_","flexible"],["number"]).columns).difference({y_col}))
+
+    # get df of dimentionality reduced of cat cols
+    ca = mca.MCA(pd.get_dummies(df[cat_cols], drop_first=True))
+    c_df = pd.DataFrame(ca.fs_r())
+    pca = PCA(min(cat_dim, len(c_df.columns)))
+    c_df = pd.DataFrame(pca.fit_transform(c_df))
+    
+    # get df of dimentionality reduced of numerical cols
+    pca = PCA(min(num_dim, len(std_cols)))
+    n_df = pd.DataFrame(pca.fit_transform(df[std_cols]))
+    
+    # get final summary
+    nn_df = pd.concat([c_df,n_df], axis=1)
+    pca = PCA(min(final_dim, len(nn_df.columns)))
+    nn_df, dfy = clean_dataset(nn_df, df)
+    nn_df = pca.fit_transform(nn_df)
+    #print(indices_to_keep)
+    dd = pd.DataFrame(nn_df)
+    dd[y_col] = dfy[y_col].values
+    return dd
+
+
 def meta_results(ds_name):
     ds_namee = "".join(ds_name)
     #supervised_results = pd.concat([pn.read_csv("model_scores_roc_census06_mbe.csv"), pd.read_csv("model_scores_roc_census611_mbe.csv")])
@@ -157,6 +197,18 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
             privacy, include_real, uniform, uniform2, maybe = 0, True, True, True, False
             case_name = "0.0ttt"
         print(case_name)
+        
+        # entropy ranges (0-1], representing the prob of knowing which one is the real-one
+        def get_entropy(privacy, include_real):
+            entropy = privacy*10
+            if privacy == 0:
+                entropy = 1.
+            elif include_real:
+                entropy = entropy/10
+            else include_real:
+                entropy = (10-entropy)/10
+            return entropy
+            
         if case_name not in processed_cases:
             for rand_num in range(10):
                 case_name_rand = case_name +"_"+ str(rand_num)
@@ -168,7 +220,10 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
                 data = data[[col for col in data.columns if col not in exclude_cols]]
                 data_cols = data.columns
                 data_y = data[y_col]
-
+                
+                # do dimentionality reduction
+                data=dim_reduction(data, y_col)
+                
                 # selects categorical data
                 std_cols = list(set(data.select_dtypes(["number"]).columns).difference({y_col}))
                 for col in std_cols:
