@@ -58,13 +58,13 @@ def dim_reduction(df, y_col, num_dim=2, cat_dim=2, final_dim=2):
 
 # entropy ranges (0-1], representing the prob of knowing which one is the real-one
 def get_entropy(privacy, include_real):
-    entropy = privacy*10
+    #entropy = privacy*10
     if privacy == 0:
         entropy = 1.
     elif include_real=="t":
-        entropy = float(entropy)/10
+        entropy = float(privacy)/10
     elif include_real=="f":
-        entropy = float((10-entropy))/10
+        entropy = float((10-privacy))/10
     else:
         entropy = 0
     return entropy
