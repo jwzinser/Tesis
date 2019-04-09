@@ -1,13 +1,15 @@
-import pandas as pn
+import pandas as pd
 import numpy as np
+import re
 from matplotlib import pyplot as plt
 from sklearn import preprocessing, metrics, linear_model, metrics, svm, naive_bayes, tree
 from collections import Counter
 import sys
+from IPython.display import display, clear_output
 from matplotlib.ticker import FormatStrFormatter, FuncFormatter, PercentFormatter
 import math
 from scipy.interpolate import  spline
-
+import time
 figures_path = "/home/juanzinser/Documents/plots/" if sys.platform == "linux" \
     else "/Users/juanzinser/Documents/plots/"
 
@@ -54,6 +56,19 @@ def dim_reduction(df, y_col, num_dim=2, cat_dim=2, final_dim=2):
     dd[y_col] = dfy[y_col].values
     return dd
 
+# entropy ranges (0-1], representing the prob of knowing which one is the real-one
+def get_entropy(privacy, include_real):
+    entropy = privacy*10
+    if privacy == 0:
+        entropy = 1.
+    elif include_real=="t":
+        entropy = float(entropy)/10
+    elif include_real=="f":
+        entropy = float((10-entropy))/10
+    else:
+        entropy = 0
+    return entropy
+        
 
 def meta_results(ds_name):
     ds_namee = "".join(ds_name)
@@ -158,7 +173,7 @@ def meta_ds_results(df_path, ds_name, y_col, exclude_cols):
     # benchmark
     privacy, include_real, uniform, uniform2, maybe = 0, True, True, True, False
 
-    data = pd.read_csv(dataset_path)#.sample()
+    data = pd.read_csv(df_path)#.sample()
     data = data.sample(int(len(data)/2))
     data = data.dropna()
     data = data[[col for col in data.columns if col not in exclude_cols]]
@@ -197,17 +212,6 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
             privacy, include_real, uniform, uniform2, maybe = 0, True, True, True, False
             case_name = "0.0ttt"
         print(case_name)
-        
-        # entropy ranges (0-1], representing the prob of knowing which one is the real-one
-        def get_entropy(privacy, include_real):
-            entropy = privacy*10
-            if privacy == 0:
-                entropy = 1.
-            elif include_real:
-                entropy = entropy/10
-            else include_real:
-                entropy = (10-entropy)/10
-            return entropy
             
         if case_name not in processed_cases:
             for rand_num in range(10):
@@ -219,11 +223,12 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
                 data = data.dropna()
                 data = data[[col for col in data.columns if col not in exclude_cols]]
                 data_cols = data.columns
-                data_y = data[y_col]
+                #data_y = data[y_col]
                 
                 # do dimentionality reduction
                 data=dim_reduction(data, y_col)
-                
+                data_y = data[y_col]
+
                 # selects categorical data
                 std_cols = list(set(data.select_dtypes(["number"]).columns).difference({y_col}))
                 for col in std_cols:
@@ -246,7 +251,7 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
                 nis["case"] = case_name_rand
                 reco_list.append(nis)
 
-                dataa =  pd.concat([pd.DataFrame(v, columns=[k+"/"+i for i in meta_info["columns"][k]["key_to_order"].keys()]) for k, v in asd.items()], axis=1)
+                dataa =  pd.concat([pd.DataFrame(v, columns=[str(k)+"/"+str(i) for i in meta_info["columns"][k]["key_to_order"].keys()]) for k, v in asd.items()], axis=1)
                 if len(data_y.unique())==2:
                     dataa["y"] = (data_y==data_y.unique()[0]).astype(int).values
                 else: # in case there is numeric take the median
@@ -271,13 +276,14 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
 
     df_models_scores = pd.DataFrame.from_dict(case_model_scores, orient="index").reset_index().rename(columns={"index":"case"})
     df_models_scores = df_models_scores.melt(id_vars=df_models_scores.columns[0], value_vars=df_models_scores.columns[1:], value_name="models")
-    df_models_scores = pn.DataFrame.from_dict(case_model_scores, orient="index").reset_index().rename(columns={"index":"case"})
+    df_models_scores = pd.DataFrame.from_dict(case_model_scores, orient="index").reset_index().rename(columns={"index":"case"})
     df_models_scores = df_models_scores.melt(id_vars=["case"]).rename(columns={"variable":"model"})
 
     df_models_scores["privacy"] = df_models_scores["case"].map(lambda x: int("".join(re.findall("\d+", x)[:2])))
-    df_models_scores["entropy"] = df_models_scores["privacy"]
 
     df_models_scores["real"] = df_models_scores["case"].map(lambda x: re.findall("[^\d]",x)[1])
+    df_models_scores["entropy"] = df_models_scores.apply(lambda x: get_entropy(x["privacy"], x["real"]),axis=1)
+
     df_models_scores["uniform"] = df_models_scores["case"].map(lambda x: int(re.findall("[^\d]",x)[2] == "t"))
     df_models_scores["uniform2"] = df_models_scores["case"].map(lambda x: int(re.findall("[^\d]",x)[3] == "t"))
 
@@ -292,8 +298,8 @@ def sanitize_df(df_path, ds_name, y_col, exclude_cols, cases):
 
     df_models_scores["roc_x"] = df_models_scores["value"].map(lambda x: all_entries_vector(x[2][0]))
     df_models_scores["roc_y"] = df_models_scores["value"].map(lambda x: all_entries_vector(x[2][1]))
-    df_models = df_models_scores[["case", "model", "privacy", "real", "uniform", "uniform2", "error", "auc", "roc_x", "roc_y"]]
-    df_models.columns = [["case", "model", "privacy", "real", "uniform", "uniform2", "error", "auc", "roc_x", "roc_y"]]
+    df_models = df_models_scores[["case", "model", "privacy","entropy", "real", "uniform", "uniform2", "error", "auc", "roc_x", "roc_y"]]
+    df_models.columns = [["case", "model", "privacy","entropy", "real", "uniform", "uniform2", "error", "auc", "roc_x", "roc_y"]]
     df_models.to_csv("model_scores_roc_"+ds_name+timestr+".csv")
 
 def check_include_real(include_real, privacy, class_length):
@@ -1100,7 +1106,7 @@ def rocs_by_case(df, base_filter, lines_cases, savefig=False, title=None, save_n
                 xs.extend(x)
                 ys.extend(y)
 
-            df_roc = pn.DataFrame({"fpr": xs, "tpr": ys}).sort_values(by="fpr", ascending=True)
+            df_roc = pd.DataFrame({"fpr": xs, "tpr": ys}).sort_values(by="fpr", ascending=True)
             df_roc.loc[:, "fpr_dis"] = df_roc["fpr"].map(lambda x: round(x,2))
             gb = df_roc.groupby("fpr_dis")["tpr"].mean().reset_index().sort_values(by="fpr_dis", ascending=True)
             gb_std = df_roc.groupby("fpr_dis")["tpr"].std().reset_index().sort_values(by="fpr_dis", ascending=True)
