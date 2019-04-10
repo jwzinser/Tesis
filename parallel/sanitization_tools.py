@@ -62,9 +62,9 @@ def get_entropy(privacy, include_real):
     if privacy == 0:
         entropy = 1.
     elif include_real=="t":
-        entropy = float(privacy)/10
+        entropy = 1/float(privacy)
     elif include_real=="f":
-        entropy = float((10-privacy))/10
+        entropy = 1/float((10-privacy)) if privacy!=10 else 1./10
     else:
         entropy = 0
     return entropy
